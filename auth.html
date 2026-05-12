@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>LiveChat - Authentification</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+
+<div class="page">
+    <!-- HEADER FIXE -->
+    <div class="header">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="login">🔑 Connexion</button>
+            <button class="tab-btn" data-tab="register">✨ Inscription</button>
+        </div>
+        <div class="info-row">
+            <div class="logo-area">
+                <div class="logo-wrapper">
+                    <div class="logo-placeholder"><i class="fa-solid fa-comments"></i></div>
+                    <span class="app-name">LiveChat</span>
+                </div>
+            </div>
+            <div class="session-area">
+                <div id="sessionInfo"></div>
+                <button id="useSessionBtn" class="confirm-session-btn" style="display:none;">Utiliser cette session</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BANDE D'INFORMATION -->
+    <div id="infoBanner" class="info-banner">
+        <span id="bannerMessage"></span>
+        <div id="progressBar" class="progress-bar" style="display:none;">
+            <div class="progress-fill"></div>
+        </div>
+    </div>
+
+    <!-- FORMULAIRES -->
+    <div class="forms-container">
+        <!-- CONNEXION -->
+        <div id="loginForm" class="form-card active">
+            <h2>Connexion</h2>
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="loginEmail" placeholder="Email">
+            </div>
+            <div class="input-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="loginPassword" placeholder="Mot de passe">
+                <button type="button" class="toggle-password" data-target="loginPassword">
+                    <i class="fa-regular fa-eye"></i>
+                </button>
+            </div>
+            <div class="form-footer">
+                <a href="#" id="forgotPasswordLink" class="forgot-link">Mot de passe oublié ?</a>
+            </div>
+            <button id="doLoginBtn" class="btn-primary">Se connecter</button>
+        </div>
+
+        <!-- INSCRIPTION (multi‑étapes) -->
+        <div id="registerForm" class="form-card">
+            <div id="step1" class="step active">
+                <h2>Email</h2>
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="regEmail" placeholder="Votre email">
+                </div>
+            </div>
+            <div id="step2" class="step">
+                <h2>Mot de passe</h2>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="regPassword" placeholder="Mot de passe">
+                    <button type="button" class="toggle-password" data-target="regPassword">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-check-circle"></i>
+                    <input type="password" id="regConfirmPassword" placeholder="Confirmer">
+                    <button type="button" class="toggle-password" data-target="regConfirmPassword">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+                <div id="passwordStrength" class="strength-box"></div>
+            </div>
+            <div id="step3" class="step">
+                <h2>Pseudo</h2>
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="regUsername" placeholder="Nom d'utilisateur">
+                </div>
+                <div class="photo-area">
+                    <div class="photo-circle" id="profileCircle">+</div>
+                    <button type="button" id="choosePhotoBtn" class="photo-btn">Choisir une photo</button>
+                    <input type="file" id="photoInput" accept="image/*" style="display:none;">
+                </div>
+            </div>
+            <div id="step4" class="step">
+                <h2>Récapitulatif</h2>
+                <div class="recap-box">
+                    <div class="recap-avatar" id="recapAvatar"></div>
+                    <p><strong>Email :</strong> <span id="recapEmail"></span></p>
+                    <p><strong>Pseudo :</strong> <span id="recapUsername"></span></p>
+                </div>
+                <button id="createAccountBtn" class="btn-primary">Créer mon compte</button>
+            </div>
+            <div id="step5" class="step">
+                <h2>Bienvenue !</h2>
+                <div class="welcome-box">
+                    <i class="fas fa-comments"></i>
+                    <p>✔️ Messages instantanés</p>
+                    <p>✔️ Notifications en temps réel</p>
+                    <p>✔️ Mode sombre</p>
+                </div>
+                <button id="finishBtn" class="btn-primary">Commencer</button>
+            </div>
+            <div class="step-nav">
+                <button id="prevBtn" class="step-btn prev">Précédent</button>
+                <button id="nextBtn" class="step-btn next">Suivant</button>
+            </div>
+        </div>
+
+        <!-- MOT DE PASSE OUBLIÉ -->
+        <div id="forgotForm" class="form-card">
+            <h2>Réinitialisation</h2>
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="forgotEmail" placeholder="Votre email">
+            </div>
+            <button id="resetPasswordBtn" class="btn-primary">Envoyer</button>
+            <a href="#" id="backToLoginLink" class="back-link">Retour</a>
+        </div>
+    </div>
+</div>
+
+<!-- OVERLAY 1 : CONDITIONS + NOTIFICATIONS -->
+<div id="successOverlay" class="overlay" style="display: none;">
+    <div class="overlay-card">
+        <h3><i class="fas fa-check-circle"></i> Connecté avec succès</h3>
+        <div class="overlay-options">
+            <label class="overlay-option">
+                <input type="checkbox" id="acceptNotifs">
+                <span>🔔 Activer les notifications</span>
+            </label>
+            <label class="overlay-option">
+                <input type="checkbox" id="acceptTerms">
+                <span>📄 J'accepte les conditions d'utilisation</span>
+            </label>
+        </div>
+        <div class="overlay-buttons">
+            <button id="cancelOverlayBtn" class="btn-secondary">Annuler</button>
+            <button id="continueOverlayBtn" class="btn-primary">Continuer</button>
+        </div>
+    </div>
+</div>
+
+<!-- OVERLAY 2 : USERNAME (uniquement pour la connexion) -->
+<div id="usernameOverlay" class="overlay" style="display: none;">
+    <div class="overlay-card">
+        <h3><i class="fas fa-user-edit"></i> Choisissez un pseudo</h3>
+        <div class="input-group">
+            <i class="fas fa-user"></i>
+            <input type="text" id="usernameInput" placeholder="Pseudo (min 2 caractères)">
+        </div>
+        <div id="usernameError" class="error-msg">Minimum 2 caractères</div>
+        <div class="overlay-buttons">
+            <button id="cancelUsernameBtn" class="btn-secondary">Annuler</button>
+            <button id="confirmUsernameBtn" class="btn-primary">OK</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODALE DE CHARGEMENT -->
+<div id="loadingModal" class="modal-loading" style="display: none;">
+    <div class="modal-card">
+        <div class="spinner"></div>
+        <p id="modalStatus">Chargement...</p>
+    </div>
+</div>
+
+<!-- FIREBASE SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+
+<script>
+    // Configuration Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyB2ZhldZcUH0HZHJxe-21EiXVMiPKFSqyg",
+        authDomain: "livechat-4dd07.firebaseapp.com",
+        databaseURL: "https://livechat-4dd07-default-rtdb.firebaseio.com/",
+        projectId: "livechat-4dd07",
+        storageBucket: "livechat-4dd07.firebasestorage.app",
+        messagingSenderId: "276812426291",
+        appId: "1:276812426291:web:c4688a1ec5c06161d20746"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    window.auth = firebase.auth();
+    window.db = firebase.database();
+    window.storage = firebase.storage();
+    window.messaging = firebase.messaging();
+
+    window.firebaseSignIn = (auth, email, pwd) => auth.signInWithEmailAndPassword(email, pwd);
+    window.firebaseCreateUser = (auth, email, pwd) => auth.createUserWithEmailAndPassword(email, pwd);
+    window.firebaseResetPassword = (auth, email) => auth.sendPasswordResetEmail(email);
+    window.firebaseUpdateProfile = (user, data) => user.updateProfile(data);
+    window.firebaseSet = (ref, data) => ref.set(data);
+    window.firebaseRef = (db, path) => db.ref(path);
+    window.firebaseStorageRef = (storage, path) => storage.ref(path);
+    window.firebaseUploadBytes = (ref, file) => ref.put(file);
+    window.firebaseGetDownloadURL = (ref) => ref.getDownloadURL();
+</script>
+<script src="js/auth.js"></script>
+</body>
+</html>

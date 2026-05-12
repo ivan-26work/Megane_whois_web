@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Megane_whois</title>
+
+    <!-- 🔥 PWA : theme + manifest -->
+    <meta name="theme-color" content="#090d14">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+
+    <!-- 🔥 Thème unique : Nuit (pas de flash) -->
+    <style>
+        html {
+            background-color: #090d14;
+            transition: none;
+        }
+    </style>
+
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+
+<script>
+    // 🔥 Vérification de connexion + redirection si nécessaire
+    const loggedIn = localStorage.getItem('megane_logged_in');
+    const appDiv = document.querySelector('.app');
+
+    if (!loggedIn) {
+        if (appDiv) appDiv.classList.add('hide');
+        const overlay = document.createElement('div');
+        overlay.className = 'login-overlay';
+        overlay.innerHTML = `
+            <i class="fas fa-comments"></i>
+            <h2>🔒 Connectez-vous à votre compte</h2>
+            <p>Pour accéder à Megane_whois, veuillez vous connecter.</p>
+            <button onclick="window.location.href='auth.html'">Se connecter</button>
+        `;
+        document.body.appendChild(overlay);
+    } else {
+        if (appDiv) appDiv.classList.remove('hide');
+    }
+</script>
+
+<div class="app">
+    <!-- VUE DISCUSSIONS -->
+    <div class="view active" id="chatView">
+        <div class="header">
+            <button class="plus-btn-header" id="plusBtn"><i class="fas fa-plus"></i></button>
+            <div class="searchbar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="chatSearch" placeholder="Rechercher...">
+            </div>
+            <button class="btn-settings" id="settingsBtnHeader">
+                <i class="fas fa-cog"></i> Paramètres
+            </button>
+        </div>
+        <div class="list-container" id="discList"></div>
+        <div class="footer-bar" id="footerBar">
+            <div class="footer-left">
+                <span class="app-name">Megane_whois</span>
+                <span class="version-badge">v1.0.0</span>
+            </div>
+            <div class="footer-center" id="footerClock">--:--:--</div>
+            <div class="footer-right" id="footerBadge" style="display: none;">0</div>
+        </div>
+    </div>
+
+    <!-- VUE DISCUSSION -->
+    <div class="view" id="discView">
+        <div class="chat-header">
+            <button class="back-btn" id="backBtn"><i class="fas fa-arrow-left"></i></button>
+            <div class="avatar" id="chatAvatar" style="width:44px;height:44px; cursor:pointer;">?</div>
+            <div class="chat-meta" id="chatMeta">
+                <div class="chat-name" id="chatName">—</div>
+                <div class="chat-status">
+                    <span class="online-status" id="onlineStatus">—</span>
+                    <span class="typing-indicator" id="typingIndicator"></span>
+                </div>
+            </div>
+        </div>
+        <div class="messages-area" id="msgsArea"></div>
+        <div class="input-area">
+            <div class="input-wrap">
+                <textarea id="msgInput" rows="1" placeholder="Écrire un message..."></textarea>
+            </div>
+            <div class="attach-buttons">
+                <button class="attach-btn" id="attachImageBtn"><i class="fas fa-image"></i></button>
+                <button class="attach-btn" id="attachAudioBtn"><i class="fas fa-microphone"></i></button>
+                <button class="attach-btn" id="attachAudioStopBtn" style="display: none;"><i class="fas fa-stop"></i></button>
+            </div>
+            <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+        </div>
+        <div class="recording-indicator" id="recordingIndicator" style="display: none;">
+            <div class="recording-wave">
+                <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <span class="recording-text">Enregistrement...</span>
+            <span class="recording-timer" id="recordingTimer">0:00</span>
+        </div>
+        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+    </div>
+
+    <!-- VUE PARAMÈTRES -->
+    <div class="view" id="settingsView">
+        <div class="header-settings">
+            <button class="back-btn-settings" id="backFromSettingsBtn"><i class="fas fa-arrow-left"></i></button>
+            <span class="title-settings">Paramètres</span>
+        </div>
+        <div class="settings-container">
+            <div class="section">
+                <div class="section-title"><i class="fas fa-user-circle"></i> Mon profil</div>
+                <div class="profile-card">
+                    <div class="profile-avatar" id="avatarBtn" style="cursor:pointer;">
+                        <span id="avatarInitial">👤</span>
+                    </div>
+                    <div class="profile-info">
+                        <input type="text" id="usernameInput" placeholder="Nom d'utilisateur" value="">
+                        <div class="email" id="userEmail"></div>
+                    </div>
+                </div>
+                <button class="save-btn" id="saveProfileBtn">Enregistrer</button>
+            </div>
+
+            <div class="section">
+                <div class="section-title"><i class="fas fa-shield-alt"></i> Confidentialité</div>
+                <div class="toggle-item"><div class="toggle-label"><span class="toggle-title">🔍 Être trouvé dans la recherche</span><span class="toggle-desc">Permettre aux autres utilisateurs de me trouver</span></div><div class="toggle-switch" id="toggleFindable"></div></div>
+                <div class="toggle-item"><div class="toggle-label"><span class="toggle-title">🟢 Masquer ma présence en ligne</span><span class="toggle-desc">Personne ne verra mon statut (en ligne/hors ligne)</span></div><div class="toggle-switch" id="toggleHidePresence"></div></div>
+                <div class="toggle-item"><div class="toggle-label"><span class="toggle-title">📖 Désactiver confirmateur de lecture</span><span class="toggle-desc">Les ✔️ n'apparaîtront pas (pour personne)</span></div><div class="toggle-switch" id="toggleDisableReadReceipt"></div></div>
+                <div class="toggle-item"><div class="toggle-label"><span class="toggle-title">✏️ Désactiver indicateur d'écriture</span><span class="toggle-desc">Personne ne verra "En train d'écrire..."</span></div><div class="toggle-switch" id="toggleDisableTyping"></div></div>
+            </div>
+            <div class="section">
+                <div class="section-title"><i class="fas fa-volume-up"></i> Notifications sonores & vibration</div>
+                <div class="slider-item"><div class="slider-label"><span class="slider-title">🔊 Volume son</span><span class="slider-value" id="volumeValue">50%</span></div><input type="range" id="volumeSlider" class="slider" min="0" max="100" value="50"></div>
+                <div class="slider-item"><div class="slider-label"><span class="slider-title">📳 Intensité vibration</span><span class="slider-value" id="vibrationValue">50%</span></div><input type="range" id="vibrationSlider" class="slider" min="0" max="100" value="50"></div>
+            </div>
+            <div class="section">
+                <div class="section-title"><i class="fas fa-sign-out-alt"></i> Compte</div>
+                <button class="logout-btn" id="logoutBtn">Se déconnecter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VUE FIND LIVE USER -->
+    <div class="view" id="findUserView">
+        <div class="header">
+            <button class="back-btn" id="backFromFindBtn"><i class="fas fa-arrow-left"></i></button>
+            <span class="title">Find live user</span>
+        </div>
+        <div class="mode-toggles">
+            <div class="mode-btn active" data-mode="username">👤 By username</div>
+            <div class="mode-btn" data-mode="email">📧 By email</div>
+        </div>
+        <div class="find-container">
+            <div class="search-area">
+                <input type="text" id="findSearchInput" class="search-input" placeholder="Rechercher...">
+                <button id="findActionBtn" class="action-btn"><i class="fas fa-search"></i> Find</button>
+            </div>
+            <div id="findResultArea"></div>
+        </div>
+        <div class="footer-bar find-footer">
+            <div class="footer-left"><span class="app-name">Megane_whois</span><span class="version-badge">v1.0.0</span></div>
+            <div class="footer-center" id="findFooterClock">--:--:--</div>
+        </div>
+    </div>
+
+    <!-- VUE INFO USER -->
+    <div class="view" id="userInfoView">
+        <div class="header">
+            <button class="back-btn" id="backFromUserInfoBtn"><i class="fas fa-arrow-left"></i></button>
+            <span class="title">Profil</span>
+        </div>
+        <div class="userinfo-container" id="userInfoContainer">
+            <div class="userinfo-card">
+                <div class="userinfo-avatar" id="userInfoAvatar">
+                    <span id="userInfoAvatarText">?</span>
+                </div>
+                <div class="userinfo-name" id="userInfoName">—</div>
+                <div class="userinfo-email" id="userInfoEmail">—</div>
+                <div class="userinfo-status" id="userInfoStatus">—</div>
+                <button class="userinfo-chat-btn" id="userInfoChatBtn">💬 Envoyer un message</button>
+            </div>
+        </div>
+        <div class="footer-bar userinfo-footer">
+            <div class="footer-left"><span class="app-name">Megane_whois</span><span class="version-badge">v1.0.0</span></div>
+            <div class="footer-center" id="userInfoFooterClock">--:--:--</div>
+        </div>
+    </div>
+</div>
+
+<div id="deleteModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <p><i class="fas fa-trash-alt"></i> Supprimer cette discussion ?</p>
+        <p class="modal-hint">Tous les messages seront définitivement effacés.</p>
+        <div class="modal-buttons"><button id="confirmDeleteBtn" class="btn-danger">Supprimer</button><button id="cancelDeleteBtn" class="btn-secondary">Annuler</button></div>
+    </div>
+</div>
+
+<div id="confirmLogoutOverlay" class="modal" style="display:none;">
+    <div class="modal-content">
+        <p><i class="fas fa-question-circle"></i> Se déconnecter ?</p>
+        <p class="modal-hint">Tu devras te reconnecter pour accéder à ton compte.</p>
+        <div class="modal-buttons"><button id="confirmLogoutBtn" class="btn-danger">Déconnexion</button><button id="cancelLogoutBtn" class="btn-secondary">Annuler</button></div>
+    </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
+
+<!-- 🔥 PWA : Enregistrement du service worker -->
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('✅ SW enregistré:', reg))
+            .catch(err => console.error('❌ Erreur SW:', err));
+    }
+</script>
+
+<!-- Scripts principaux -->
+<script src="js/firebase-config.js"></script>
+<script src="js/index.js"></script>
+</body>
+</html>
