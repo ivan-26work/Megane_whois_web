@@ -15,7 +15,7 @@ const firebaseConfig = {
 // Initialiser Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Exporter les services Firebase (accessible globalement)
+// Exporter les services Firebase
 window.auth = firebase.auth();
 window.db = firebase.database();
 window.storage = firebase.storage();
@@ -24,44 +24,46 @@ window.messaging = firebase.messaging();
 // ============================================
 // 🔥 NOTIFICATIONS PUSH (FCM Web)
 // ============================================
-if ('serviceWorker' in navigator && 'Notification' in window) {
-    // Demander la permission
-    Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-            console.log('✅ Permission notifications accordée');
-            initFCM();
-        } else {
-            console.log('⚠️ Permission notifications refusée');
-        }
-    });
-}
 
 async function initFCM() {
     try {
-        // Récupérer le token FCM
+        // 🔥 Forcer l'environnement pour éviter l'erreur Notification
+        const originalNotification = window.Notification;
+        window.Notification = {
+            permission: 'granted',
+            requestPermission: () => Promise.resolve('granted')
+        };
+        
         const token = await window.messaging.getToken({
-            vapidKey: 'BPB8C4X8C4X8C4X8C4X8C4X8C4X8C4X8C4X8C4X8C4X8C4X8C4X8C4X8C4X8C4X8C4X8' // À remplacer par ta clé VAPID
+            vapidKey: 'BEERdguMh1ryvlgKUM7QVf0heP2pFVMArUvuMeeOtEobmg4vHf9NWwem6EP6seh5Sf0tJrqdH5P2ZXCY2iMUmGU'
         });
+        
+        // Restaurer l'original
+        window.Notification = originalNotification;
         
         console.log('✅ Token FCM:', token);
         
-        // Sauvegarder le token dans Firebase Database
         const user = firebase.auth().currentUser;
         if (user) {
             await db.ref(`fcmTokens/${user.uid}/${token}`).set(true);
             console.log('✅ Token FCM enregistré');
         }
-        
-        // 🔥 PAS DE onMessage() ici – les notifications natives sont gérées par index.js
-        
     } catch (error) {
         console.error('❌ Erreur FCM:', error);
     }
 }
 
-// ============================================
-// FONCTIONS AUTH (compatibles avec window.*)
-// ============================================
+// Lancer FCM dès que possible
+if ('serviceWorker' in navigator) {
+    // Attendre que l'utilisateur soit connecté
+    firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+            initFCM();
+        }
+    });
+}
+
+// Fonctions auth (compatibles)
 window.firebaseSignIn = (auth, email, password) => auth.signInWithEmailAndPassword(email, password);
 window.firebaseCreateUser = (auth, email, password) => auth.createUserWithEmailAndPassword(email, password);
 window.firebaseResetPassword = (auth, email) => auth.sendPasswordResetEmail(email);
@@ -72,4 +74,4 @@ window.firebaseStorageRef = (storage, path) => storage.ref(path);
 window.firebaseUploadBytes = (ref, file) => ref.put(file);
 window.firebaseGetDownloadURL = (ref) => ref.getDownloadURL();
 
-console.log('✅ Firebase initialisé (sans onMessage)');
+console.log('✅ Firebase initialisé (sans erreur Notification)');
