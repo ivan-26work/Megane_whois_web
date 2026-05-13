@@ -19,6 +19,9 @@ let audioChunks = [];
 let recordingStartTime = 0;
 let recordingTimerInterval = null;
 let isRecording = false;
+let isPaused = false;
+let audioRecordBlob = null;
+let mediaStream = null;
 
 // ==================== AVATARS PRÉDÉFINIS ====================
 const predefinedAvatars = [
@@ -33,24 +36,14 @@ const predefinedAvatars = [
 ];
 
 // ==================== CACHE LOCAL ====================
-function saveDiscsToCache() {
-    localStorage.setItem('megane_discsMap', JSON.stringify(discsMap));
-}
-
-function saveUsersToCache() {
-    localStorage.setItem('megane_allUsers', JSON.stringify(allUsers));
-}
+function saveDiscsToCache() { localStorage.setItem('megane_discsMap', JSON.stringify(discsMap)); }
+function saveUsersToCache() { localStorage.setItem('megane_allUsers', JSON.stringify(allUsers)); }
 
 function loadCache() {
     const savedDiscs = localStorage.getItem('megane_discsMap');
-    if (savedDiscs) {
-        discsMap = JSON.parse(savedDiscs);
-        renderDiscs();
-    }
+    if (savedDiscs) { discsMap = JSON.parse(savedDiscs); renderDiscs(); }
     const savedUsers = localStorage.getItem('megane_allUsers');
-    if (savedUsers) {
-        allUsers = JSON.parse(savedUsers);
-    }
+    if (savedUsers) { allUsers = JSON.parse(savedUsers); }
 }
 
 // ==================== CHARGEMENT DU PROFIL ====================
@@ -66,14 +59,12 @@ async function loadUserProfile() {
             localStorage.setItem('megane_username', me.displayName);
             localStorage.setItem('megane_email', me.email);
             if (me.photoURL) localStorage.setItem('megane_photoURL', me.photoURL);
-
             const usernameInput = document.getElementById('usernameInput');
             const userEmailSpan = document.getElementById('userEmail');
             const avatarInitial = document.getElementById('avatarInitial');
             if (usernameInput) usernameInput.value = me.displayName;
             if (userEmailSpan) userEmailSpan.textContent = me.email;
             if (avatarInitial) avatarInitial.textContent = (me.displayName || me.email || '?').charAt(0).toUpperCase();
-
             const avatarBtn = document.getElementById('avatarBtn');
             if (avatarBtn && me.photoURL) {
                 avatarBtn.innerHTML = `<img src="${me.photoURL}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
@@ -81,9 +72,7 @@ async function loadUserProfile() {
                 avatarBtn.innerHTML = `<span id="avatarInitial">${(me.displayName || '?').charAt(0).toUpperCase()}</span>`;
             }
         }
-    } catch (err) {
-        console.error("Erreur chargement profil:", err);
-    }
+    } catch (err) { console.error("Erreur chargement profil:", err); }
 }
 
 // ==================== BARRE FOOTER ====================
@@ -107,19 +96,8 @@ function loadSoundSettings() {
     if (vibrationValue) vibrationValue.textContent = vibrationPercent + '%';
 }
 
-function saveVolume(value) {
-    volumePercent = value;
-    localStorage.setItem('volumePercent', value);
-    const volumeValue = document.getElementById('volumeValue');
-    if (volumeValue) volumeValue.textContent = value + '%';
-}
-
-function saveVibration(value) {
-    vibrationPercent = value;
-    localStorage.setItem('vibrationPercent', value);
-    const vibrationValue = document.getElementById('vibrationValue');
-    if (vibrationValue) vibrationValue.textContent = value + '%';
-}
+function saveVolume(value) { volumePercent = value; localStorage.setItem('volumePercent', value); const el = document.getElementById('volumeValue'); if (el) el.textContent = value + '%'; }
+function saveVibration(value) { vibrationPercent = value; localStorage.setItem('vibrationPercent', value); const el = document.getElementById('vibrationValue'); if (el) el.textContent = value + '%'; }
 
 function playNotifSound() {
     if (volumePercent === 0) return;
@@ -134,21 +112,12 @@ function playNotifSound() {
         oscillator.start();
         gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + 0.5);
         oscillator.stop(audioCtx.currentTime + 0.5);
-    } catch(e) { console.log("Audio non supporté"); }
+    } catch(e) {}
 }
 
-function vibrate() {
-    if (vibrationPercent === 0) return;
-    if (navigator.vibrate) {
-        const duration = Math.floor(200 * (vibrationPercent / 100));
-        navigator.vibrate(duration);
-    }
-}
+function vibrate() { if (vibrationPercent > 0 && navigator.vibrate) navigator.vibrate(Math.floor(200 * (vibrationPercent / 100))); }
 
-function getCurrentTime() {
-    const now = new Date();
-    return now.toLocaleTimeString('fr-FR', { hour12: false });
-}
+function getCurrentTime() { return new Date().toLocaleTimeString('fr-FR', { hour12: false }); }
 
 let barreClockInterval = null;
 function startBarreClock() {
@@ -156,9 +125,7 @@ function startBarreClock() {
     const update = () => {
         const clockElement = document.getElementById('footerClock');
         const footerBar = document.getElementById('footerBar');
-        if (clockElement && footerBar && !footerBar.classList.contains('temp-mode')) {
-            clockElement.textContent = getCurrentTime();
-        }
+        if (clockElement && footerBar && !footerBar.classList.contains('temp-mode')) clockElement.textContent = getCurrentTime();
         const findClock = document.getElementById('findFooterClock');
         if (findClock) findClock.textContent = getCurrentTime();
         const userInfoClock = document.getElementById('userInfoFooterClock');
@@ -172,13 +139,7 @@ function updateFooterTotalBadge() {
     let total = 0;
     for (let convId in discsMap) total += discsMap[convId].unread || 0;
     const badgeEl = document.getElementById('footerBadge');
-    if (badgeEl) {
-        if (total === 0) badgeEl.style.display = 'none';
-        else {
-            badgeEl.style.display = 'flex';
-            badgeEl.textContent = total;
-        }
-    }
+    if (badgeEl) { badgeEl.style.display = total === 0 ? 'none' : 'flex'; badgeEl.textContent = total; }
 }
 
 function setFooterNormalMode() {
@@ -226,15 +187,9 @@ function startBarreListeners() {
             let isFirstMessage = true;
             const newMsgListener = db.ref(`messages/${convId}`).orderByChild('timestamp').limitToLast(1);
             newMsgListener.on('child_added', async (msgSnap) => {
-                if (isFirstMessage) {
-                    isFirstMessage = false;
-                    return;
-                }
+                if (isFirstMessage) { isFirstMessage = false; return; }
                 const msg = msgSnap.val();
-                if (!msg) return;
-                if (msg.senderId === me.uid) return;
-                if (document.hidden) return;
-                if (currentConvId === convId) return;
+                if (!msg || msg.senderId === me.uid || document.hidden || currentConvId === convId) return;
                 let senderName = "Utilisateur";
                 const userSnap = await db.ref(`users/${msg.senderId}`).once('value');
                 const user = userSnap.val();
@@ -265,9 +220,7 @@ function showBanner(message, type = 'info') {
     banner.textContent = message;
     banner.className = `showBanner ${type}`;
     banner.style.display = 'block';
-    setTimeout(() => {
-        banner.style.display = 'none';
-    }, 3000);
+    setTimeout(() => { banner.style.display = 'none'; }, 3000);
 }
 
 // ==================== RÉGLAGES ====================
@@ -296,24 +249,30 @@ async function saveSetting(key, value) {
     if (key === 'hidePresence') await db.ref(`users/${me.uid}/online`).set(!value);
 }
 
+// ==================== UPLOAD FICHIERS ====================
+async function uploadFile(file) {
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("https://0x0.st", { method: "POST", body: fd });
+    const url = (await res.text()).trim();
+    if (!url.startsWith("https://")) throw new Error("Upload échoué");
+    return url;
+}
+
 // ==================== GESTION AVATAR ====================
-async function updateAvatar(avatarUrl) {
+async function updateAvatar(file) {
     if (!me) return;
     try {
-        await db.ref(`users/${me.uid}/photoURL`).set(avatarUrl);
-        me.photoURL = avatarUrl;
-        localStorage.setItem('megane_photoURL', avatarUrl);
-        
+        showBanner("📤 Upload de la photo...", "progress");
+        const photoURL = await uploadFile(file);
+        await db.ref(`users/${me.uid}/photoURL`).set(photoURL);
+        me.photoURL = photoURL;
+        localStorage.setItem('megane_photoURL', photoURL);
         const avatarBtn = document.getElementById('avatarBtn');
-        if (avatarBtn) {
-            avatarBtn.innerHTML = `<img src="${avatarUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-        }
+        if (avatarBtn) avatarBtn.innerHTML = `<img src="${photoURL}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
         renderDiscs();
-        showBanner("✅ Avatar mis à jour !", "success");
-    } catch (err) {
-        console.error("Erreur mise à jour avatar:", err);
-        showBanner("❌ Erreur lors de la mise à jour", "error");
-    }
+        showBanner("✅ Photo mise à jour !", "success");
+    } catch (err) { showBanner("❌ Erreur upload", "error"); }
 }
 
 function showAvatarSelector() {
@@ -322,30 +281,39 @@ function showAvatarSelector() {
     modal.style.display = 'flex';
     modal.innerHTML = `
         <div class="modal-content" style="max-width: 350px;">
-            <h3 style="margin-bottom: 16px;">Choisir un avatar</h3>
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
-                ${predefinedAvatars.map(av => `
-                    <div class="avatar-option" data-avatar-emoji="${av.emoji}" data-avatar-color="${av.color}" style="cursor: pointer; text-align: center; padding: 10px; border-radius: 50%; background: ${av.color}; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 30px;">
-                        ${av.emoji}
-                    </div>
-                `).join('')}
+            <h3 style="margin-bottom: 16px;">Photo de profil</h3>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;">
+                ${predefinedAvatars.map(av => `<div class="avatar-option" data-avatar-emoji="${av.emoji}" data-avatar-color="${av.color}" style="cursor: pointer; text-align: center; padding: 10px; border-radius: 50%; background: ${av.color}; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 30px;">${av.emoji}</div>`).join('')}
             </div>
+            <button id="avatarUploadBtn" class="btn-primary" style="width: 100%; margin-bottom: 8px;"><i class="fas fa-camera"></i> Prendre une photo</button>
+            <input type="file" id="avatarFileInput" accept="image/*" style="display: none;">
             <button id="avatarCancelBtn" class="btn-secondary" style="width: 100%;">Annuler</button>
         </div>
     `;
     document.body.appendChild(modal);
-    
     modal.querySelectorAll('.avatar-option').forEach(opt => {
         opt.addEventListener('click', () => {
             const emoji = opt.dataset.avatarEmoji;
             const color = opt.dataset.avatarColor;
             const avatarUrl = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='${color.replace('#', '%23')}'/%3E%3Ctext x='50' y='67' text-anchor='middle' fill='white' font-size='50'%3E${emoji}%3C/text%3E%3C/svg%3E`;
-            updateAvatar(avatarUrl);
+            updateAvatarFromUrl(avatarUrl);
             modal.remove();
         });
     });
-    
+    document.getElementById('avatarUploadBtn')?.addEventListener('click', () => document.getElementById('avatarFileInput').click());
+    document.getElementById('avatarFileInput')?.addEventListener('change', (e) => { if (e.target.files[0]) { updateAvatar(e.target.files[0]); modal.remove(); } });
     document.getElementById('avatarCancelBtn')?.addEventListener('click', () => modal.remove());
+}
+
+async function updateAvatarFromUrl(avatarUrl) {
+    if (!me) return;
+    await db.ref(`users/${me.uid}/photoURL`).set(avatarUrl);
+    me.photoURL = avatarUrl;
+    localStorage.setItem('megane_photoURL', avatarUrl);
+    const avatarBtn = document.getElementById('avatarBtn');
+    if (avatarBtn) avatarBtn.innerHTML = `<img src="${avatarUrl}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+    renderDiscs();
+    showBanner("✅ Avatar mis à jour !", "success");
 }
 
 // ==================== VUE INFO USER ====================
@@ -355,95 +323,100 @@ let previousViewId = null;
 function showUserInfo(userId, fromViewId) {
     previousViewId = fromViewId;
     currentInfoUserId = userId;
-    
     const user = allUsers[userId] || {};
     const name = user.username || user.email || "Utilisateur";
     const email = user.email || "Email non renseigné";
     const online = user.online || false;
     const photoURL = user.photoURL || null;
-    
     const avatarEl = document.getElementById('userInfoAvatar');
+    if (avatarEl) avatarEl.innerHTML = photoURL ? `<img src="${photoURL}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : `<span>${initial(name)}</span>`;
     const nameEl = document.getElementById('userInfoName');
-    const emailEl = document.getElementById('userInfoEmail');
-    const statusEl = document.getElementById('userInfoStatus');
-    
-    if (avatarEl) {
-        if (photoURL) {
-            avatarEl.innerHTML = `<img src="${photoURL}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
-        } else {
-            avatarEl.innerHTML = `<span id="userInfoAvatarText">${initial(name)}</span>`;
-        }
-    }
     if (nameEl) nameEl.textContent = name;
+    const emailEl = document.getElementById('userInfoEmail');
     if (emailEl) emailEl.textContent = email;
-    if (statusEl) {
-        statusEl.textContent = online ? "🟢 En ligne" : "⚫ Hors ligne";
-        statusEl.className = online ? "userinfo-status online" : "userinfo-status offline";
-    }
-    
+    const statusEl = document.getElementById('userInfoStatus');
+    if (statusEl) { statusEl.textContent = online ? "🟢 En ligne" : "⚫ Hors ligne"; statusEl.className = online ? "userinfo-status online" : "userinfo-status offline"; }
     showView('userInfoView');
 }
 
 function initUserInfoView() {
-    const backBtn = document.getElementById('backFromUserInfoBtn');
-    if (backBtn) {
-        backBtn.onclick = () => {
-            if (previousViewId) {
-                showView(previousViewId);
-            } else {
-                showView('chatView');
-            }
-        };
-    }
-    
-    const chatBtn = document.getElementById('userInfoChatBtn');
-    if (chatBtn) {
-        chatBtn.onclick = () => {
-            if (currentInfoUserId) {
-                startOrOpenChat(currentInfoUserId);
-            }
-        };
-    }
+    document.getElementById('backFromUserInfoBtn').onclick = () => showView(previousViewId || 'chatView');
+    document.getElementById('userInfoChatBtn').onclick = () => { if (currentInfoUserId) startOrOpenChat(currentInfoUserId); };
 }
 
 // ==================== RÉPONDRE PAR GLISSEMENT ====================
-function formatReplyMessage(text) {
-    const replyPattern = /📎 \[Rép: "([^"]+)"\]\n([\s\S]*)/;
-    const match = text.match(replyPattern);
-    
-    if (match) {
-        return {
-            isReply: true,
-            quotedText: match[1],
-            replyText: match[2].trim() || "(suite)"
-        };
-    }
-    return { isReply: false, originalText: text };
+function getCleanMessageText(element) {
+    const replyNew = element.querySelector('.reply-new-message');
+    if (replyNew) return replyNew.textContent.trim();
+    const img = element.querySelector('.msg-image img, .bubble img');
+    if (img) return '';
+    const audio = element.querySelector('.bubble audio');
+    if (audio) return '';
+    const bubble = element.querySelector('.bubble');
+    if (bubble) return bubble.textContent.trim() || '';
+    return element.textContent.trim();
 }
 
-let touchStartX = null;
-let touchStartY = null;
-let currentSwipeMsgElement = null;
+function getReplyMediaData(element) {
+    const img = element.querySelector('.msg-image img, .bubble img');
+    if (img) return { type: 'image', url: img.src };
+    const audio = element.querySelector('.bubble audio');
+    if (audio) return { type: 'audio', url: audio.src };
+    return null;
+}
+
+function showReplyQuote(data) {
+    let quoteBar = document.getElementById('replyQuoteBar');
+    const inputArea = document.querySelector('.input-area');
+
+    if (!quoteBar) {
+        quoteBar = document.createElement('div');
+        quoteBar.id = 'replyQuoteBar';
+        quoteBar.className = 'reply-quote-bar';
+        inputArea.parentNode.insertBefore(quoteBar, inputArea);
+    }
+
+    let previewHtml = '';
+    if (data.type === 'image') {
+        previewHtml = `<img src="${data.url}" style="max-width:60px; max-height:60px; border-radius:8px; object-fit:cover;">`;
+    } else if (data.type === 'audio') {
+        previewHtml = `<i class="fas fa-microphone" style="color:#f87171; font-size:1.2rem;"></i> Message vocal`;
+    }
+    const displayText = data.type === 'text' ? esc(data.text) : previewHtml;
+
+    quoteBar.innerHTML = `
+        <div class="reply-quote-content">
+            <span class="reply-quote-message">${displayText}</span>
+        </div>
+        <button class="reply-quote-close">✕</button>
+    `;
+    quoteBar.style.display = 'flex';
+    quoteBar.querySelector('.reply-quote-close').addEventListener('click', () => {
+        replyToMessageData = null;
+        quoteBar.style.display = 'none';
+        quoteBar.innerHTML = '';
+    });
+}
 
 function initSwipeToReply() {
+    let touchStartX = null;
+    let touchStartY = null;
+    let currentSwipeMsgElement = null;
     const msgsArea = document.getElementById('msgsArea');
     if (!msgsArea) return;
-    
+
     msgsArea.addEventListener('touchstart', (e) => {
         const target = e.target.closest('.msg-row');
-        if (!target) return;
-        if (target.classList.contains('sent')) return;
+        if (!target || target.classList.contains('sent')) return;
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
         currentSwipeMsgElement = target;
     });
-    
+
     msgsArea.addEventListener('touchmove', (e) => {
         if (!touchStartX || !currentSwipeMsgElement) return;
-        const currentX = e.touches[0].clientX;
-        const diffX = currentX - touchStartX;
+        const diffX = e.touches[0].clientX - touchStartX;
         const diffY = Math.abs(e.touches[0].clientY - touchStartY);
-        
         if (diffX > 30 && diffY < 20) {
             e.preventDefault();
             currentSwipeMsgElement.style.transform = `translateX(${Math.min(diffX, 150)}px)`;
@@ -451,18 +424,21 @@ function initSwipeToReply() {
             currentSwipeMsgElement.style.opacity = `${1 - Math.min(diffX / 200, 0.5)}`;
         }
     });
-    
+
     msgsArea.addEventListener('touchend', (e) => {
         if (!touchStartX || !currentSwipeMsgElement) return;
-        const endX = e.changedTouches[0].clientX;
-        const diffX = endX - touchStartX;
-        
+        const diffX = e.changedTouches[0].clientX - touchStartX;
         if (diffX > 80) {
-            const msgText = currentSwipeMsgElement.querySelector('.bubble')?.textContent || '';
-            replyToMessageData = { msgText };
-            showReplyQuote(msgText);
+            const mediaData = getReplyMediaData(currentSwipeMsgElement);
+            const cleanText = getCleanMessageText(currentSwipeMsgElement);
+            if (mediaData) {
+                replyToMessageData = { type: mediaData.type, url: mediaData.url, text: cleanText };
+                showReplyQuote({ type: mediaData.type, url: mediaData.url });
+            } else if (cleanText) {
+                replyToMessageData = { type: 'text', text: cleanText };
+                showReplyQuote({ type: 'text', text: cleanText });
+            }
         }
-        
         currentSwipeMsgElement.style.transform = '';
         currentSwipeMsgElement.style.opacity = '';
         touchStartX = null;
@@ -470,201 +446,201 @@ function initSwipeToReply() {
     });
 }
 
-function showReplyQuote(quotedText) {
-    let quoteBar = document.getElementById('replyQuoteBar');
-    if (!quoteBar) {
-        const inputArea = document.querySelector('.input-area');
-        quoteBar = document.createElement('div');
-        quoteBar.id = 'replyQuoteBar';
-        quoteBar.className = 'reply-quote-bar';
-        quoteBar.innerHTML = `
-            <div class="reply-quote-content">
-                <span class="reply-quote-text">⤴️ Réponse à :</span>
-                <span class="reply-quote-message">${esc(quotedText)}</span>
-            </div>
-            <button class="reply-quote-close">✕</button>
-        `;
-        inputArea.parentNode.insertBefore(quoteBar, inputArea);
-        
-        quoteBar.querySelector('.reply-quote-close').addEventListener('click', () => {
-            replyToMessageData = null;
-            quoteBar.remove();
+// ==================== ENVOI DE MESSAGE TEXTE ====================
+async function sendMessage() {
+    const input = document.getElementById('msgInput');
+    let text = input.value?.trim();
+    if (!text && !replyToMessageData) return;
+    if (!currentConvId) return;
+
+    let msgText = text || '';
+    let msgImageUrl = null;
+    let msgAudioUrl = null;
+
+    if (replyToMessageData) {
+        if (replyToMessageData.type === 'image') {
+            msgImageUrl = replyToMessageData.url;
+            msgText = `[Rép: "📷 Photo"] ${msgText || "(suite)"}`;
+        } else if (replyToMessageData.type === 'audio') {
+            msgAudioUrl = replyToMessageData.url;
+            msgText = `[Rép: "🎤 Message vocal"] ${msgText || "(suite)"}`;
+        } else {
+            const quoted = replyToMessageData.text.replace(/"/g, '\\"');
+            msgText = `[Rép: "${quoted}"] ${msgText || "(suite)"}`;
+        }
+        replyToMessageData = null;
+        const quoteBar = document.getElementById('replyQuoteBar');
+        if (quoteBar) { quoteBar.style.display = 'none'; quoteBar.innerHTML = ''; }
+    }
+
+    input.value = '';
+    input.style.height = 'auto';
+    if (typingTimer) clearTimeout(typingTimer);
+    if (!meSettings.disableTyping && currentConvId) db.ref(`typing/${currentConvId}/${me.uid}`).remove();
+
+    const tempMsg = {
+        senderId: me.uid,
+        text: msgText,
+        imageUrl: msgImageUrl || null,
+        audioUrl: msgAudioUrl || null,
+        timestamp: Date.now(),
+        pending: true
+    };
+
+    appendMessageToDOM(tempMsg);
+    saveMessageToCache(currentConvId, tempMsg);
+
+    try {
+        const newMsgRef = await db.ref(`messages/${currentConvId}`).push({
+            senderId: me.uid,
+            text: msgText,
+            imageUrl: msgImageUrl || null,
+            audioUrl: msgAudioUrl || null,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
         });
-    } else {
-        quoteBar.querySelector('.reply-quote-message').textContent = quotedText;
-        quoteBar.style.display = 'flex';
+        const newMsgSnap = await newMsgRef.once('value');
+        const newMsg = newMsgSnap.val();
+        updateMessageInCache(currentConvId, tempMsg.timestamp, { id: newMsgRef.key, timestamp: newMsg.timestamp, pending: false });
+
+        await db.ref(`conversations/${currentConvId}`).update({ lastMessage: msgText, lastMessageTime: newMsg.timestamp });
+        if (discsMap[currentConvId]) {
+            discsMap[currentConvId].lastMsg = msgText;
+            discsMap[currentConvId].lastTime = newMsg.timestamp;
+            discsMap[currentConvId].lastMsgSender = me.uid;
+            discsMap[currentConvId].lastSentRead = false;
+            renderDiscs();
+            saveDiscsToCache();
+        }
+        const snap = await db.ref(`conversations/${currentConvId}/lastRead/${currentOtherUid}`).once('value');
+        if ((snap.val() || 0) < Date.now() - 5000) sendPush(currentOtherUid, msgText);
+    } catch (e) {
+        console.error(e);
+        markMessageError(currentConvId, tempMsg.timestamp);
     }
 }
 
 // ==================== ENVOI D'IMAGES ====================
-async function uploadToImageService(file) {
-    const services = [
-        {
-            name: "tmpfiles",
-            url: "https://tmpfiles.org/api/v1/upload",
-            buildForm: (f) => { const fd = new FormData(); fd.append("file", f); return fd; },
-            extractUrl: (data) => data.data.url.replace("tmpfiles.org", "tmpfiles.org/dl"),
-            isValid: (data) => data.status === "success"
-        },
-        {
-            name: "0x0.st",
-            url: "https://0x0.st",
-            buildForm: (f) => { const fd = new FormData(); fd.append("file", f); return fd; },
-            extractUrl: (data) => data.trim(),
-            isValid: (data) => data.startsWith("https://")
-        },
-        {
-            name: "Pomf2",
-            url: "https://pomf2.lain.la/upload.php",
-            buildForm: (f) => { const fd = new FormData(); fd.append("files[]", f); return fd; },
-            extractUrl: (data) => data.files?.[0]?.url,
-            isValid: (data) => data.success === true
-        }
-    ];
-    
-    for (const service of services) {
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 30000);
-            
-            const response = await fetch(service.url, {
-                method: "POST",
-                body: service.buildForm(file),
-                signal: controller.signal
-            });
-            
-            clearTimeout(timeoutId);
-            
-            if (!response.ok) continue;
-            
-            let data;
-            const text = await response.text();
-            try { data = JSON.parse(text); } catch(e) { data = text; }
-            
-            const url = service.extractUrl(data);
-            if (url && service.isValid(data)) {
-                console.log(`✅ Upload image réussi avec ${service.name}: ${url}`);
-                return url;
-            }
-        } catch (e) {
-            console.warn(`⚠️ Erreur ${service.name}:`, e.message);
-        }
-    }
-    throw new Error("Aucun service d'upload n'a fonctionné");
-}
-
-async function sendImageMessage(file, caption = "") {
+async function sendImageMessage(file) {
     const convId = currentConvId;
-    if (!convId) {
-        showBanner("Aucune discussion ouverte", "error");
-        return;
-    }
-    
-    if (!me || !me.uid) {
-        showBanner("Utilisateur non connecté", "error");
-        return;
-    }
-    
-    showBanner("📤 Upload de l'image...", "progress");
-    
+    if (!convId || !me) return;
+
+    showBanner("📤 Upload de l'image...", "info");
+
     try {
-        const imageUrl = await uploadToImageService(file);
-        
+        const imageUrl = await uploadFile(file);
+
         await db.ref(`messages/${convId}`).push({
             senderId: me.uid,
-            text: caption || "📷 Photo",
+            text: "📷 Photo",
             imageUrl: imageUrl,
             timestamp: firebase.database.ServerValue.TIMESTAMP
         });
-        
+
         await db.ref(`conversations/${convId}`).update({
-            lastMessage: caption || "📷 Photo",
+            lastMessage: "📷 Photo",
             lastMessageTime: firebase.database.ServerValue.TIMESTAMP
         });
-        
+
         showBanner("✅ Image envoyée !", "success");
-        
+
     } catch (error) {
         console.error("❌ Erreur upload:", error);
         showBanner("❌ Erreur: " + error.message, "error");
     }
 }
-
-// ==================== ENVOI DE MESSAGE VOCAL ====================
-async function uploadToAudioService(file) {
-    const services = [
-        {
-            name: "tmpfiles",
-            url: "https://tmpfiles.org/api/v1/upload",
-            buildForm: (f) => { const fd = new FormData(); fd.append("file", f); return fd; },
-            extractUrl: (data) => data.data.url.replace("tmpfiles.org", "tmpfiles.org/dl"),
-            isValid: (data) => data.status === "success"
-        },
-        {
-            name: "0x0.st",
-            url: "https://0x0.st",
-            buildForm: (f) => { const fd = new FormData(); fd.append("file", f); return fd; },
-            extractUrl: (data) => data.trim(),
-            isValid: (data) => data.startsWith("https://")
-        },
-        {
-            name: "Pomf2",
-            url: "https://pomf2.lain.la/upload.php",
-            buildForm: (f) => { const fd = new FormData(); fd.append("files[]", f); return fd; },
-            extractUrl: (data) => data.files?.[0]?.url,
-            isValid: (data) => data.success === true
-        }
-    ];
-    
-    for (const service of services) {
-        try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 30000);
-            
-            const response = await fetch(service.url, {
-                method: "POST",
-                body: service.buildForm(file),
-                signal: controller.signal
-            });
-            
-            clearTimeout(timeoutId);
-            
-            if (!response.ok) continue;
-            
-            let data;
-            const text = await response.text();
-            try { data = JSON.parse(text); } catch(e) { data = text; }
-            
-            const url = service.extractUrl(data);
-            if (url && service.isValid(data)) {
-                console.log(`✅ Upload audio réussi avec ${service.name}: ${url}`);
-                return url;
-            }
-        } catch (e) {
-            console.warn(`⚠️ Erreur ${service.name}:`, e.message);
-        }
-    }
-    throw new Error("Aucun service d'upload n'a fonctionné");
+// ==================== ENREGISTREMENT AUDIO ====================
+async function startRecordingFlow() {
+    if (isRecording) return;
+    if (!navigator.mediaDevices || !window.MediaRecorder) { showBanner("Enregistrement non supporté", "error"); return; }
+    try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        startNewChunk();
+        updateRecordingUI('recording');
+        showBanner("Enregistrement...", "info");
+    } catch (e) { showBanner("Accès micro refusé", "error"); }
 }
 
-async function sendAudioMessage(blob, duration = 0) {
+function startNewChunk() {
+    if (!mediaStream) return;
+    let mimeType = '';
+    ['audio/webm', 'audio/mp4', 'audio/ogg'].forEach(t => { if (MediaRecorder.isTypeSupported(t) && !mimeType) mimeType = t; });
+    mediaRecorder = new MediaRecorder(mediaStream, mimeType ? { mimeType } : {});
+    const chunkContainer = [];
+    mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunkContainer.push(e.data); };
+    mediaRecorder.onstop = () => {
+        const blob = new Blob(chunkContainer, { type: mimeType || 'audio/webm' });
+        audioChunks = [...audioChunks, blob];
+    };
+    mediaRecorder.start(1000);
+    isRecording = true;
+    recordingStartTime = recordingStartTime || Date.now();
+    startRecordingTimer();
+}
+
+function stopRecordingChunk() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        isRecording = false;
+        stopRecordingTimer();
+    }
+}
+
+function pauseRecording() {
+    stopRecordingChunk();
+    audioRecordBlob = new Blob(audioChunks, { type: 'audio/webm' });
+    isPaused = true;
+    updateRecordingUI('paused');
+}
+
+function resumeRecording() {
+    if (!isPaused) return;
+    isPaused = false;
+    startNewChunk();
+    updateRecordingUI('recording');
+}
+
+function cancelRecording() {
+    stopRecordingChunk();
+    if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+    audioChunks = [];
+    audioRecordBlob = null;
+    isRecording = false;
+    isPaused = false;
+    recordingStartTime = 0;
+    stopRecordingTimer();
+    updateRecordingUI('idle');
+}
+
+function playPreview() {
+    if (!audioRecordBlob) return;
+    const url = URL.createObjectURL(audioRecordBlob);
+    const a = new Audio(url);
+    a.play();
+}
+
+async function sendAudioFromRecording() {
+    if (!audioRecordBlob && audioChunks.length === 0) return;
+    stopRecordingChunk();
+    if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+    
+    const finalBlob = audioRecordBlob || new Blob(audioChunks, { type: 'audio/webm' });
     const convId = currentConvId;
-    if (!convId) {
-        showBanner("Aucune discussion ouverte", "error");
-        return;
-    }
+    if (!convId || !me) { updateRecordingUI('idle'); return; }
+
+    const duration = Math.floor((Date.now() - recordingStartTime) / 1000);
     
-    if (!me || !me.uid) {
-        showBanner("Utilisateur non connecté", "error");
-        return;
-    }
-    
-    showBanner("📤 Upload du message vocal...", "progress");
-    
+    updateRecordingUI('idle');
+    audioChunks = [];
+    audioRecordBlob = null;
+    isPaused = false;
+    recordingStartTime = 0;
+
+    showBanner("📤 Upload du message vocal...", "info");
+
     try {
-        const file = new File([blob], `audio_${Date.now()}.webm`, { type: 'audio/webm' });
-        const audioUrl = await uploadToAudioService(file);
-        
+        const file = new File([finalBlob], `audio_${Date.now()}.webm`, { type: 'audio/webm' });
+        const audioUrl = await uploadFile(file);
+
         await db.ref(`messages/${convId}`).push({
             senderId: me.uid,
             text: "🎤 Message vocal",
@@ -672,238 +648,145 @@ async function sendAudioMessage(blob, duration = 0) {
             audioDuration: duration,
             timestamp: firebase.database.ServerValue.TIMESTAMP
         });
-        
+
         await db.ref(`conversations/${convId}`).update({
             lastMessage: "🎤 Message vocal",
             lastMessageTime: firebase.database.ServerValue.TIMESTAMP
         });
-        
+
         showBanner("✅ Message vocal envoyé !", "success");
-        
+
     } catch (error) {
         console.error("❌ Erreur upload audio:", error);
         showBanner("❌ Erreur: " + error.message, "error");
     }
 }
-
-// ==================== ENREGISTREMENT AUDIO ====================
-async function startRecording() {
-    if (isRecording) {
-        showBanner("Enregistrement déjà en cours", "info");
-        return;
-    }
-    
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        showBanner("L'enregistrement audio n'est pas supporté", "error");
-        return;
-    }
-    
-    if (!window.MediaRecorder) {
-        showBanner("MediaRecorder non supporté", "error");
-        return;
-    }
-    
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        
-        let mimeType = '';
-        const mimeTypes = ['audio/webm', 'audio/mp4', 'audio/ogg'];
-        for (const type of mimeTypes) {
-            if (MediaRecorder.isTypeSupported(type)) {
-                mimeType = type;
-                break;
-            }
-        }
-        
-        const options = mimeType ? { mimeType: mimeType } : {};
-        mediaRecorder = new MediaRecorder(stream, options);
-        audioChunks = [];
-        
-        mediaRecorder.ondataavailable = (e) => {
-            if (e.data.size > 0) {
-                audioChunks.push(e.data);
-            }
-        };
-        
-        mediaRecorder.onstop = async () => {
-            const audioBlob = new Blob(audioChunks, { type: mimeType || 'audio/webm' });
-            const duration = Math.floor((Date.now() - recordingStartTime) / 1000);
-            
-            if (mediaRecorder.stream) {
-                mediaRecorder.stream.getTracks().forEach(track => track.stop());
-            }
-            
-            if (audioBlob.size > 0 && audioBlob.size < 20 * 1024 * 1024) {
-                await sendAudioMessage(audioBlob, duration);
-            } else if (audioBlob.size === 0) {
-                showBanner("Enregistrement vide", "error");
-            } else if (audioBlob.size >= 20 * 1024 * 1024) {
-                showBanner("Audio trop long (max 20 Mo)", "error");
-            }
-            
-            stopRecordingUI();
-        };
-        
-        mediaRecorder.onerror = (e) => {
-            console.error("MediaRecorder error:", e);
-            showBanner("Erreur lors de l'enregistrement", "error");
-            stopRecordingUI();
-        };
-        
-        mediaRecorder.start(1000);
-        isRecording = true;
-        recordingStartTime = Date.now();
-        
-        startRecordingUI();
-        
-    } catch (error) {
-        console.error("Erreur accès micro:", error);
-        let errorMessage = "Impossible d'accéder au microphone";
-        if (error.name === 'NotAllowedError') {
-            errorMessage = "Permission micro refusée";
-        } else if (error.name === 'NotFoundError') {
-            errorMessage = "Aucun microphone trouvé";
-        } else if (error.name === 'NotReadableError') {
-            errorMessage = "Micro déjà utilisé par une autre application";
-        }
-        showBanner(errorMessage, "error");
-    }
-}
-
-function stopRecording() {
-    if (mediaRecorder && isRecording && mediaRecorder.state === 'recording') {
-        mediaRecorder.stop();
-        isRecording = false;
-    } else if (mediaRecorder && mediaRecorder.state === 'inactive') {
-        if (mediaRecorder.stream) {
-            mediaRecorder.stream.getTracks().forEach(track => track.stop());
-        }
-        stopRecordingUI();
-    }
-}
-
-function startRecordingUI() {
+function updateRecordingUI(state) {
     const audioBtn = document.getElementById('attachAudioBtn');
     const stopBtn = document.getElementById('attachAudioStopBtn');
+    const sendBtn = document.getElementById('sendBtn');
     const recordingIndicator = document.getElementById('recordingIndicator');
     const recordingTimer = document.getElementById('recordingTimer');
-    
-    if (audioBtn) {
-        audioBtn.style.display = 'none';
-        audioBtn.classList.add('recording');
+    const previewBtns = document.getElementById('recordingPreviewBtns');
+    const inputArea = document.querySelector('.input-area');
+
+    // Créer les boutons de preview si pas encore là
+    if (!previewBtns && state === 'paused') {
+        const div = document.createElement('div');
+        div.id = 'recordingPreviewBtns';
+        div.style.cssText = 'display:flex; gap:6px; align-items:center;';
+        div.innerHTML = `
+            <button id="attachAudioCancelBtn" class="attach-btn" style="color:#f87171; border-color:#f87171;"><i class="fas fa-trash"></i></button>
+            <button id="attachAudioPlayBtn" class="attach-btn" style="color:#5eead4; border-color:#5eead4;"><i class="fas fa-play"></i></button>
+            <button id="attachAudioResumeBtn" class="attach-btn" style="color:#f59e0b; border-color:#f59e0b;"><i class="fas fa-microphone"></i></button>
+        `;
+        inputArea.insertBefore(div, sendBtn);
+        document.getElementById('attachAudioCancelBtn').addEventListener('click', cancelRecording);
+        document.getElementById('attachAudioPlayBtn').addEventListener('click', playPreview);
+        document.getElementById('attachAudioResumeBtn').addEventListener('click', resumeRecording);
     }
-    if (stopBtn) stopBtn.style.display = 'flex';
-    if (recordingIndicator) recordingIndicator.style.display = 'flex';
-    
+
+    if (state === 'recording') {
+        if (audioBtn) audioBtn.style.display = 'none';
+        if (stopBtn) stopBtn.style.display = 'flex';
+        if (sendBtn) sendBtn.style.display = 'none';
+        if (recordingIndicator) recordingIndicator.style.display = 'flex';
+        if (previewBtns) previewBtns.style.display = 'none';
+        if (recordingTimer) recordingTimer.textContent = '0:00';
+    } else if (state === 'paused') {
+        if (stopBtn) stopBtn.style.display = 'none';
+        if (sendBtn) sendBtn.style.display = 'flex';
+        if (recordingIndicator) recordingIndicator.style.display = 'flex';
+        if (previewBtns) previewBtns.style.display = 'flex';
+    } else {
+        if (audioBtn) audioBtn.style.display = 'flex';
+        if (stopBtn) stopBtn.style.display = 'none';
+        if (sendBtn) sendBtn.style.display = 'flex';
+        if (recordingIndicator) recordingIndicator.style.display = 'none';
+        if (previewBtns) { previewBtns.remove(); }
+    }
+}
+
+function startRecordingTimer() {
+    const timer = document.getElementById('recordingTimer');
+    if (!timer) return;
     recordingTimerInterval = setInterval(() => {
-        if (!isRecording) return;
+        if (!isRecording && !isPaused) return;
         const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
-        const mins = Math.floor(elapsed / 60);
-        const secs = elapsed % 60;
-        if (recordingTimer) {
-            recordingTimer.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
-        }
+        timer.textContent = `${Math.floor(elapsed/60)}:${(elapsed%60).toString().padStart(2,'0')}`;
     }, 1000);
 }
 
-function stopRecordingUI() {
-    const audioBtn = document.getElementById('attachAudioBtn');
-    const stopBtn = document.getElementById('attachAudioStopBtn');
-    const recordingIndicator = document.getElementById('recordingIndicator');
-    const recordingTimer = document.getElementById('recordingTimer');
-    
-    if (audioBtn) {
-        audioBtn.style.display = 'flex';
-        audioBtn.classList.remove('recording');
-    }
-    if (stopBtn) stopBtn.style.display = 'none';
-    if (recordingIndicator) recordingIndicator.style.display = 'none';
-    if (recordingTimer) recordingTimer.textContent = '0:00';
-    
-    if (recordingTimerInterval) {
-        clearInterval(recordingTimerInterval);
-        recordingTimerInterval = null;
+function stopRecordingTimer() {
+    if (recordingTimerInterval) { clearInterval(recordingTimerInterval); recordingTimerInterval = null; }
+}
+
+// ==================== GESTION CACHE MESSAGES ====================
+function saveMessageToCache(convId, msg) {
+    const cached = JSON.parse(localStorage.getItem(`megane_messages_${convId}`) || '[]');
+    cached.push(msg);
+    localStorage.setItem(`megane_messages_${convId}`, JSON.stringify(cached));
+}
+
+function updateMessageInCache(convId, timestamp, updates) {
+    const cached = JSON.parse(localStorage.getItem(`megane_messages_${convId}`) || '[]');
+    const idx = cached.findIndex(m => m.timestamp === timestamp);
+    if (idx !== -1) {
+        Object.assign(cached[idx], updates);
+        localStorage.setItem(`megane_messages_${convId}`, JSON.stringify(cached));
     }
 }
 
-// ==================== ENVOI DE MESSAGE TEXTE ====================
-async function sendMessage() {
-    const input = document.getElementById('msgInput');
-    let text = input.value?.trim();
-    if (!text && !replyToMessageData) return;
-    
-    if (replyToMessageData) {
-        const quoted = replyToMessageData.msgText.replace(/"/g, '\\"');
-        text = `📎 [Rép: "${quoted}"]\n${text || "(suite)"}`;
-        replyToMessageData = null;
-        const quoteBar = document.getElementById('replyQuoteBar');
-        if (quoteBar) quoteBar.remove();
-    }
-    
-    input.value = '';
-    input.style.height = 'auto';
-    if (typingTimer) clearTimeout(typingTimer);
-    if (!meSettings.disableTyping && currentConvId) {
-        await db.ref(`typing/${currentConvId}/${me.uid}`).remove();
-    }
-    
-    if (!currentConvId || !text) return;
-    
-    try {
-        const newMsgRef = await db.ref(`messages/${currentConvId}`).push({
-            senderId: me.uid, text, timestamp: firebase.database.ServerValue.TIMESTAMP
-        });
-        const newMsgSnap = await newMsgRef.once('value');
-        const newMsg = newMsgSnap.val();
-        await db.ref(`conversations/${currentConvId}`).update({ lastMessage: text, lastMessageTime: newMsg.timestamp });
-        if (discsMap[currentConvId]) {
-            discsMap[currentConvId].lastSentRead = false;
-            discsMap[currentConvId].lastMsg = text;
-            discsMap[currentConvId].lastTime = newMsg.timestamp;
-            discsMap[currentConvId].lastMsgSender = me.uid;
-            renderDiscs();
+function markMessageError(convId, timestamp) {
+    updateMessageInCache(convId, timestamp, { error: true, pending: false });
+    if (currentConvId === convId) {
+        const container = document.getElementById('msgsArea');
+        if (container) {
+            const rows = container.querySelectorAll('.msg-row');
+            rows.forEach(row => {
+                const timeEl = row.querySelector('.msg-time');
+                if (timeEl && parseInt(timeEl.getAttribute('data-timestamp')) === timestamp) {
+                    row.style.opacity = '0.6';
+                    let errEl = row.querySelector('.msg-error');
+                    if (!errEl) {
+                        errEl = document.createElement('div');
+                        errEl.className = 'msg-error';
+                        errEl.style.cssText = 'font-size:0.55rem; color:#f87171; text-align:right;';
+                        errEl.textContent = '❌';
+                        row.appendChild(errEl);
+                    }
+                }
+            });
         }
-        const snap = await db.ref(`conversations/${currentConvId}/lastRead/${currentOtherUid}`).once('value');
-        const targetLastRead = snap.val() || 0;
-        if (targetLastRead < Date.now() - 5000) sendPush(currentOtherUid, text);
-    } catch (e) { console.error(e); }
+    }
 }
 
-// ==================== NOTIFICATIONS PUSH ====================
+function appendMessageToDOM(msg) {
+    const container = document.getElementById('msgsArea');
+    if (!container || currentConvId === null) return;
+    const temp = document.createElement('div');
+    displayMessagesList([msg], temp, true);
+    const row = temp.firstChild;
+    if (row) container.appendChild(row);
+    container.scrollTop = container.scrollHeight;
+}
 
-// ==================== NOTIFICATIONS PUSH ====================
 // ==================== NOTIFICATIONS PUSH ====================
 async function sendPush(targetUid, messageText) {
-    // Vérifier si un Service Worker est actif
-    if (!navigator.serviceWorker || !navigator.serviceWorker.controller) {
-        console.log("⚠️ Service Worker non disponible");
-        return;
-    }
-    
+    if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
     try {
-        // Récupérer le nom de l'expéditeur
         const senderName = me.displayName || (me.email ? me.email.split('@')[0] : 'Utilisateur');
-        
-        // Envoyer un message au Service Worker pour afficher la notification
         navigator.serviceWorker.controller.postMessage({
             type: 'SHOW_NOTIFICATION',
             title: senderName,
             body: messageText.length > 200 ? messageText.slice(0, 200) + '…' : messageText,
             icon: '/assets/logo.png',
             badge: '/assets/badge.png',
-            data: {
-                userId: targetUid,
-                senderName: senderName,
-                messageText: messageText
-            }
+            data: { userId: targetUid, senderName, messageText }
         });
-        
-        console.log("📬 Notification envoyée au Service Worker pour:", targetUid);
-        
-    } catch (e) { 
-        console.error('❌ Erreur:', e); 
-    }
+    } catch (e) {}
 }
+
 // ==================== AUTH & DÉMARRAGE ====================
 const savedUid = localStorage.getItem('megane_uid');
 if (!savedUid) {
@@ -914,11 +797,7 @@ if (!savedUid) {
     const urlParams = new URLSearchParams(window.location.search);
     const directUserId = urlParams.get('openChat');
     if (directUserId && directUserId !== savedUid) {
-        setTimeout(() => {
-            if (typeof startOrOpenChat === 'function') {
-                startOrOpenChat(directUserId);
-            }
-        }, 50);
+        setTimeout(() => { if (typeof startOrOpenChat === 'function') startOrOpenChat(directUserId); }, 50);
     }
 
     loadUserProfile();
@@ -949,17 +828,13 @@ if (!savedUid) {
 }
 
 function loadAllUsers() {
-    db.ref('users').on('value', snap => {
-        allUsers = snap.val() || {};
-        saveUsersToCache();
-    });
+    db.ref('users').on('value', snap => { allUsers = snap.val() || {}; saveUsersToCache(); });
 }
 
 // ==================== CONVERSATIONS ====================
 async function updateLastMsgStatus(convId) {
     if (!discsMap[convId]) return;
-    const convRef = db.ref(`conversations/${convId}`);
-    const convSnap = await convRef.once('value');
+    const convSnap = await db.ref(`conversations/${convId}`).once('value');
     const c = convSnap.val();
     if (!c) return;
     const otherId = c.participants.find(id => id !== me.uid);
@@ -967,16 +842,11 @@ async function updateLastMsgStatus(convId) {
     let lastMsg = null;
     lastMsgSnap.forEach(msg => { lastMsg = msg.val(); });
     if (!lastMsg) return;
-    const lastMsgSender = lastMsg.senderId;
-    const lastMsgTime = lastMsg.timestamp;
-    const lastReadMe = c.lastRead?.[me.uid] || 0;
     const lastReadOther = c.lastRead?.[otherId] || 0;
-    let lastSentRead = false, lastReceivedRead = false;
-    if (lastMsgSender === me.uid) lastSentRead = lastMsgTime <= lastReadOther;
-    else lastReceivedRead = lastMsgTime <= lastReadMe;
-    discsMap[convId].lastMsgSender = lastMsgSender;
-    discsMap[convId].lastSentRead = lastSentRead;
-    discsMap[convId].lastReceivedRead = lastReceivedRead;
+    const lastReadMe = c.lastRead?.[me.uid] || 0;
+    discsMap[convId].lastMsgSender = lastMsg.senderId;
+    discsMap[convId].lastSentRead = lastMsg.senderId === me.uid ? lastMsg.timestamp <= lastReadOther : false;
+    discsMap[convId].lastReceivedRead = lastMsg.senderId !== me.uid ? lastMsg.timestamp <= lastReadMe : false;
     discsMap[convId].lastMsg = lastMsg.text;
     discsMap[convId].lastTime = lastMsg.timestamp;
     renderDiscs();
@@ -1000,45 +870,24 @@ function listenConversations() {
                 const msgsSnap = await db.ref(`messages/${convId}`).orderByChild('timestamp').startAfter(lastRead).once('value');
                 msgsSnap.forEach(m => { if (m.val().senderId !== me.uid) unread++; });
             }
-            let lastMsgSender = null, lastMsgText = c.lastMessage || 'Nouvelle conversation', lastMsgTime = c.lastMessageTime || c.createdAt || 0;
-            let lastSentRead = false, lastReceivedRead = false;
             const lastMsgSnap = await db.ref(`messages/${convId}`).orderByChild('timestamp').limitToLast(1).once('value');
             let lastMsgObj = null;
             lastMsgSnap.forEach(msg => { lastMsgObj = msg.val(); });
-            if (lastMsgObj) {
-                lastMsgSender = lastMsgObj.senderId;
-                lastMsgText = lastMsgObj.text;
-                lastMsgTime = lastMsgObj.timestamp;
-                const lastReadMe = c.lastRead?.[me.uid] || 0;
-                const lastReadOther = c.lastRead?.[otherId] || 0;
-                if (lastMsgSender === me.uid) lastSentRead = lastMsgTime <= lastReadOther;
-                else lastReceivedRead = lastMsgTime <= lastReadMe;
-            }
             newMap[convId] = {
                 convId, otherId, name: u.username || u.email || '...',
                 photo: u.photoURL || null, online: u.online || false,
-                lastMsg: lastMsgText, lastTime: lastMsgTime, unread, isTyping: false,
-                lastMsgSender, lastSentRead, lastReceivedRead
+                lastMsg: lastMsgObj ? lastMsgObj.text : (c.lastMessage || 'Nouvelle conversation'),
+                lastTime: lastMsgObj ? lastMsgObj.timestamp : (c.lastMessageTime || c.createdAt || 0),
+                unread, isTyping: false,
+                lastMsgSender: lastMsgObj ? lastMsgObj.senderId : null,
+                lastSentRead: false, lastReceivedRead: false
             };
             if (typingListeners[convId]) typingListeners[convId]();
-            const typingRefItem = db.ref(`typing/${convId}/${otherId}`);
-            const callback = typingRefItem.on('value', snap => {
-                const isTyping = snap.val();
-                if (newMap[convId]) newMap[convId].isTyping = isTyping || false;
-                if (discsMap[convId]) { discsMap[convId].isTyping = isTyping || false; renderDiscs(); }
+            const callback = db.ref(`typing/${convId}/${otherId}`).on('value', snap => {
+                newMap[convId].isTyping = snap.val() || false;
+                if (discsMap[convId]) { discsMap[convId].isTyping = newMap[convId].isTyping; renderDiscs(); }
             });
-            typingListeners[convId] = () => typingRefItem.off('value', callback);
-            const lastReadOtherRef = db.ref(`conversations/${convId}/lastRead/${otherId}`);
-            const lastReadMeRef = db.ref(`conversations/${convId}/lastRead/${me.uid}`);
-            const updateCallback = () => updateLastMsgStatus(convId);
-            lastReadOtherRef.on('value', updateCallback);
-            lastReadMeRef.on('value', updateCallback);
-            if (!typingListeners[`lastRead_${convId}`]) {
-                typingListeners[`lastRead_${convId}`] = () => {
-                    lastReadOtherRef.off('value', updateCallback);
-                    lastReadMeRef.off('value', updateCallback);
-                };
-            }
+            typingListeners[convId] = () => db.ref(`typing/${convId}/${otherId}`).off('value', callback);
         }
         discsMap = newMap;
         updateFooterTotalBadge();
@@ -1053,23 +902,33 @@ function renderDiscs() {
     const q = document.getElementById('chatSearch')?.value.toLowerCase() || '';
     let arr = Object.values(discsMap).sort((a, b) => (b.lastTime || 0) - (a.lastTime || 0));
     if (q) arr = arr.filter(d => d.name.toLowerCase().includes(q) || d.lastMsg.toLowerCase().includes(q));
-    if (!arr.length) {
-        container.innerHTML = '<div class="empty"><i class="fas fa-comments"></i>Aucune discussion</div>';
-        return;
-    }
+    if (!arr.length) { container.innerHTML = '<div class="empty"><i class="fas fa-comments"></i>Aucune discussion</div>'; return; }
+
     container.innerHTML = arr.map(d => {
         let borderClass = '';
-        let lastMsgDisplay = d.lastMsg;
-        
-        if (d.lastMsg === "🎤 Message vocal") {
-            lastMsgDisplay = '<span class="disc-audio-icon"><i class="fas fa-microphone"></i> Message vocal</span>';
-        } else if (d.lastMsg === "📷 Photo") {
-            lastMsgDisplay = '<span class="disc-audio-icon"><i class="fas fa-image"></i> Photo</span>';
+        let textColorClass = '';
+        const isReply = d.lastMsg && d.lastMsg.startsWith('[Rép:');
+
+        if (d.lastMsgSender === me.uid) {
+            borderClass = d.lastSentRead ? 'sent-read' : 'sent-unread';
+            textColorClass = 'text-sent';
+        } else {
+            if (d.unread > 0) {
+                textColorClass = isReply ? 'text-reply-unread' : 'text-received-unread';
+            } else {
+                textColorClass = 'text-read';
+            }
+            if (d.lastReceivedRead) borderClass = 'received-read';
         }
-        
-        if (d.lastMsgSender === me.uid) borderClass = d.lastSentRead ? 'sent-read' : 'sent-unread';
-        else if (d.lastReceivedRead) borderClass = 'received-read';
-        
+
+        let lastMsgDisplay = d.lastMsg;
+        if (d.lastMsg === "🎤 Message vocal") lastMsgDisplay = '<i class="fas fa-microphone"></i> Message vocal';
+        else if (d.lastMsg === "📷 Photo") lastMsgDisplay = '<i class="fas fa-image"></i> Photo';
+        else if (isReply) {
+            const match = d.lastMsg.match(/^\[Rép: "([^"]+)"\] (.*)/);
+            lastMsgDisplay = match ? esc(match[2]) : esc(d.lastMsg);
+        }
+
         return `
         <div class="disc-card ${d.unread ? 'unread' : ''} ${borderClass}" data-conv-id="${d.convId}" data-other-id="${d.otherId}">
             <div class="avatar" style="cursor:pointer;" data-user-id="${d.otherId}">
@@ -1081,23 +940,19 @@ function renderDiscs() {
                     ${d.unread ? `<span class="badge-new">${d.unread}</span>` : ''}
                     ${(!meSettings.disableTyping && d.isTyping) ? '<span style="font-size:0.65rem; color:#5eead4; margin-left:6px;">✏️ écrit...</span>' : ''}
                 </div>
-                <div class="disc-last">${(!meSettings.disableTyping && d.isTyping) ? '...' : lastMsgDisplay}</div>
+                <div class="disc-last ${textColorClass}">${(!meSettings.disableTyping && d.isTyping) ? '...' : lastMsgDisplay}</div>
             </div>
             <div class="disc-time">${fmtDate(d.lastTime)}</div>
         </div>`;
     }).join('');
-    
+
     container.querySelectorAll('.disc-card').forEach(el => {
         const convId = el.dataset.convId, otherId = el.dataset.otherId;
         let pressTimer = null;
-        const startPress = () => { pressTimer = setTimeout(() => { pendingDeleteConvId = convId; document.getElementById('deleteModal').style.display = 'flex'; pressTimer = null; }, 500); };
+        const startPress = () => { pressTimer = setTimeout(() => { pendingDeleteConvId = convId; document.getElementById('deleteModal').style.display = 'flex'; }, 500); };
         const cancelPress = () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
         el.addEventListener('click', (e) => {
-            if (e.target.closest('.avatar')) {
-                e.stopPropagation();
-                showUserInfo(otherId, 'chatView');
-                return;
-            }
+            if (e.target.closest('.avatar')) { e.stopPropagation(); showUserInfo(otherId, 'chatView'); return; }
             cancelPress();
             openChat(convId, otherId);
         });
@@ -1110,122 +965,29 @@ function renderDiscs() {
     });
 }
 
-async function deleteConversation(convId) {
-    if (!convId) return;
-    await db.ref(`messages/${convId}`).remove();
-    await db.ref(`conversations/${convId}`).remove();
-    document.getElementById('deleteModal').style.display = 'none';
-    pendingDeleteConvId = null;
-    if (currentConvId === convId) closeChat();
-}
-
+// ==================== OUVERTURE DE DISCUSSION ====================
 async function startOrOpenChat(otherId) {
     for (const [cid, d] of Object.entries(discsMap)) if (d.otherId === otherId) { openChat(cid, otherId); return; }
     const snap = await db.ref('conversations').once('value');
     const convs = snap.val() || {};
     for (const cid in convs) {
-        const c = convs[cid];
-        if (c.participants?.includes(me.uid) && c.participants?.includes(otherId)) { openChat(cid, otherId); return; }
+        if (convs[cid].participants?.includes(me.uid) && convs[cid].participants?.includes(otherId)) { openChat(cid, otherId); return; }
     }
     const ref = db.ref('conversations').push();
     await ref.set({ participants: [me.uid, otherId], createdAt: firebase.database.ServerValue.TIMESTAMP });
     openChat(ref.key, otherId);
 }
 
-// ==================== TYPING & READ STATUS ====================
-function startTypingListener(convId, otherId) {
-    if (typingRef) typingRef.off();
-    typingRef = db.ref(`typing/${convId}/${otherId}`);
-    typingRef.on('value', snap => {
-        if (meSettings.disableTyping) return;
-        const isTyping = snap.val();
-        const typingIndicator = document.getElementById('typingIndicator');
-        const onlineStatusSpan = document.getElementById('onlineStatus');
-
-        if (isTyping) {
-            if (typingIndicator) {
-                typingIndicator.style.fontWeight = 'bold';
-                typingIndicator.style.color = '#3b8bff';
-                typingIndicator.textContent = 'Écrit...';
-                let visible = true;
-                if (typingIndicator._interval) clearInterval(typingIndicator._interval);
-                const interval = setInterval(() => {
-                    if (!typingIndicator || !typingIndicator.isConnected) {
-                        clearInterval(interval);
-                        return;
-                    }
-                    visible = !visible;
-                    typingIndicator.style.opacity = visible ? '1' : '0.4';
-                }, 500);
-                typingIndicator._interval = interval;
-            }
-            if (onlineStatusSpan) onlineStatusSpan.style.display = 'none';
-        } else {
-            if (typingIndicator && typingIndicator._interval) {
-                clearInterval(typingIndicator._interval);
-                typingIndicator._interval = null;
-            }
-            if (typingIndicator) {
-                typingIndicator.textContent = '';
-                typingIndicator.style.opacity = '1';
-            }
-            if (onlineStatusSpan) onlineStatusSpan.style.display = 'inline';
-            setOnlineStatus(allUsers[otherId]?.online, otherId);
-        }
-    });
-}
-
-async function updateReadStatusOnly(convId) {
-    if (meSettings.disableReadReceipt) return;
-    if (!currentOtherUid) return;
-    const snap = await db.ref(`conversations/${convId}/lastRead/${currentOtherUid}`).once('value');
-    const otherLastRead = snap.val() || 0;
-    document.querySelectorAll('.msg-row.sent').forEach(row => {
-        const footer = row.querySelector('.message-footer');
-        if (!footer) return;
-        let statusSpan = footer.querySelector('.read-status');
-        const timeEl = footer.querySelector('.msg-time');
-        if (!timeEl) return;
-        const msgTime = parseInt(timeEl.getAttribute('data-timestamp') || '0');
-        if (!statusSpan) {
-            statusSpan = document.createElement('span');
-            statusSpan.className = 'read-status';
-            footer.appendChild(statusSpan);
-        }
-        statusSpan.textContent = (msgTime && msgTime <= otherLastRead) ? '✔️✔️' : '✔️';
-        statusSpan.className = msgTime <= otherLastRead ? 'read-status read' : 'read-status delivered';
-    });
-}
-
-// ==================== OUVERTURE DE DISCUSSION ====================
-window.openChatDirectly = (userId) => {
-    console.log("🔔 Ouverture directe pour:", userId);
-    if (me && me.uid) {
-        startOrOpenChat(userId);
-    } else {
-        setTimeout(() => {
-            if (me && me.uid) startOrOpenChat(userId);
-        }, 500);
-    }
-};
-
 async function openChat(convId, otherId) {
     cleanupChat();
     currentConvId = convId;
     currentOtherUid = otherId;
-
-    if (navigator.onLine && me) {
-        await db.ref(`conversations/${convId}/lastRead/${me.uid}`).set(firebase.database.ServerValue.TIMESTAMP);
-    }
+    if (navigator.onLine && me) await db.ref(`conversations/${convId}/lastRead/${me.uid}`).set(firebase.database.ServerValue.TIMESTAMP);
 
     const u = allUsers[otherId] || {};
     const name = u.username || u.email || '...';
     const av = document.getElementById('chatAvatar');
-    if (av) {
-        av.innerHTML = u.photoURL ? `<img src="${esc(u.photoURL)}">` : initial(name);
-        av.style.cursor = 'pointer';
-        av.onclick = () => showUserInfo(otherId, 'discView');
-    }
+    if (av) { av.innerHTML = u.photoURL ? `<img src="${esc(u.photoURL)}">` : initial(name); av.onclick = () => showUserInfo(otherId, 'discView'); }
     document.getElementById('chatName').innerText = name;
 
     if (navigator.onLine) {
@@ -1240,40 +1002,61 @@ async function openChat(convId, otherId) {
         });
     } else {
         document.getElementById('onlineStatus').innerText = 'Hors ligne';
-        document.getElementById('onlineStatus').className = 'offline';
     }
-
     loadMessages(convId);
     showView('discView');
 }
 
 function setOnlineStatus(isOnline, otherId) {
     const metaDiv = document.querySelector('.chat-header .chat-meta');
-    if (metaDiv) {
-        if (isOnline && !meSettings.hidePresence) metaDiv.classList.add('online');
-        else metaDiv.classList.remove('online');
-    }
-    if (meSettings.disableReadReceipt) {
-        document.getElementById('onlineStatus').innerText = '';
-        return;
-    }
+    if (metaDiv) metaDiv.classList.toggle('online', isOnline && !meSettings.hidePresence);
+    if (meSettings.disableReadReceipt) { document.getElementById('onlineStatus').innerText = ''; return; }
     const otherSettings = allUsers[otherId]?.settings || {};
-    if (otherSettings.hidePresence) {
-        document.getElementById('onlineStatus').innerText = '';
-        return;
-    }
+    if (otherSettings.hidePresence) { document.getElementById('onlineStatus').innerText = ''; return; }
     const el = document.getElementById('onlineStatus');
-    if (el) {
-        if (isOnline) {
-            el.innerText = 'En ligne';
-            el.style.fontWeight = 'bold';
-            el.style.color = '#34d399';
+    if (el) el.innerHTML = isOnline ? '<span style="color:#34d399; font-weight:bold;">En ligne</span>' : '<span style="color:#f87171; font-weight:bold;">Hors ligne</span>';
+}
+
+function startTypingListener(convId, otherId) {
+    if (typingRef) typingRef.off();
+    typingRef = db.ref(`typing/${convId}/${otherId}`);
+    typingRef.on('value', snap => {
+        if (meSettings.disableTyping) return;
+        const isTyping = snap.val();
+        const indicator = document.getElementById('typingIndicator');
+        const onlineStatus = document.getElementById('onlineStatus');
+        if (isTyping) {
+            if (indicator && !indicator._interval) {
+                indicator.textContent = 'Écrit...';
+                indicator.style.color = '#3b8bff';
+                indicator.style.fontWeight = 'bold';
+                let visible = true;
+                indicator._interval = setInterval(() => { visible = !visible; indicator.style.opacity = visible ? '1' : '0.4'; }, 500);
+            }
+            if (onlineStatus) onlineStatus.style.display = 'none';
         } else {
-            el.innerText = 'Hors ligne';
-            el.style.fontWeight = 'bold';
-            el.style.color = '#f87171';
+            if (indicator && indicator._interval) { clearInterval(indicator._interval); indicator._interval = null; }
+            if (indicator) { indicator.textContent = ''; indicator.style.opacity = '1'; }
+            if (onlineStatus) onlineStatus.style.display = 'inline';
         }
-    }
+    });
+}
+
+async function updateReadStatusOnly(convId) {
+    if (meSettings.disableReadReceipt || !currentOtherUid) return;
+    const snap = await db.ref(`conversations/${convId}/lastRead/${currentOtherUid}`).once('value');
+    const otherLastRead = snap.val() || 0;
+    document.querySelectorAll('.msg-row.sent').forEach(row => {
+        const footer = row.querySelector('.message-footer');
+        if (!footer) return;
+        let statusSpan = footer.querySelector('.read-status');
+        const timeEl = footer.querySelector('.msg-time');
+        if (!timeEl) return;
+        const msgTime = parseInt(timeEl.getAttribute('data-timestamp') || '0');
+        if (!statusSpan) { statusSpan = document.createElement('span'); statusSpan.className = 'read-status'; footer.appendChild(statusSpan); }
+        statusSpan.textContent = msgTime <= otherLastRead ? '✔️✔️' : '✔️';
+        statusSpan.className = msgTime <= otherLastRead ? 'read-status read' : 'read-status delivered';
+    });
 }
 
 // ==================== CHARGEMENT DES MESSAGES ====================
@@ -1282,50 +1065,27 @@ function loadMessages(convId) {
     const container = document.getElementById('msgsArea');
     if (!container) return;
 
-    if (!navigator.onLine) {
-        const cachedMessages = localStorage.getItem(`megane_messages_${convId}`);
-        if (cachedMessages) {
-            try {
-                const msgs = JSON.parse(cachedMessages);
-                displayMessagesList(msgs, container, false);
-            } catch(e) { console.error("Erreur cache", e); }
-        } else {
-            container.innerHTML = '<div class="empty"><i class="fas fa-wifi-slash"></i> Hors ligne – Discussion non disponible</div>';
-        }
-        return;
+    const cached = JSON.parse(localStorage.getItem(`megane_messages_${convId}`) || '[]');
+    if (cached.length) {
+        displayMessagesList(cached, container, true);
+        initSwipeToReply();
+    } else {
+        container.innerHTML = '<div class="empty"><i class="fas fa-comment-dots"></i>Commencez la conversation !</div>';
     }
 
-    container.innerHTML = '<div class="loader-row"><div class="spin"></div> Chargement...</div>';
+    if (!navigator.onLine) return;
+
     msgsRef = db.ref(`messages/${convId}`).orderByChild('timestamp');
     msgsRef.on('value', async snap => {
         const data = snap.val();
-        if (!data) {
-            container.innerHTML = '<div class="empty"><i class="fas fa-comment-dots"></i>Commencez la conversation !</div>';
-            return;
-        }
+        if (!data) { container.innerHTML = '<div class="empty"><i class="fas fa-comment-dots"></i>Commencez la conversation !</div>'; return; }
+        if (currentConvId === convId && me) await db.ref(`conversations/${convId}/lastRead/${me.uid}`).set(firebase.database.ServerValue.TIMESTAMP);
 
-        if (currentConvId === convId && me) {
-            await db.ref(`conversations/${convId}/lastRead/${me.uid}`).set(firebase.database.ServerValue.TIMESTAMP);
-        }
-
-        const otherLastReadSnap = await db.ref(`conversations/${convId}/lastRead/${currentOtherUid}`).once('value');
-        const otherLastRead = otherLastReadSnap.val() || 0;
-
-        let msgs = Object.entries(data).map(([id, m]) => ({ id, ...m }))
-            .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-
+        let msgs = Object.entries(data).map(([id, m]) => ({ id, ...m })).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
         localStorage.setItem(`megane_messages_${convId}`, JSON.stringify(msgs));
-        localStorage.setItem(`megane_lastread_${convId}_${currentOtherUid}`, otherLastRead);
-
         displayMessagesList(msgs, container, true);
         initSwipeToReply();
-
-        updateLastMsgStatus(convId);
-        if (currentConvId === convId && discsMap[convId]?.unread) {
-            discsMap[convId].unread = 0;
-            updateFooterTotalBadge();
-            renderDiscs();
-        }
+        if (currentConvId === convId && discsMap[convId]?.unread) { discsMap[convId].unread = 0; updateFooterTotalBadge(); renderDiscs(); }
     });
 }
 
@@ -1339,86 +1099,87 @@ function displayMessagesList(msgs, container, isOnline = false) {
     msgs.forEach(m => {
         const isMe = m.senderId === me.uid;
         const ds = dateSep(m.timestamp);
-        if (ds !== lastDate) {
-            html += `<div class="date-sep">${ds}</div>`;
-            lastDate = ds;
-        }
+        if (ds !== lastDate) { html += `<div class="date-sep">${ds}</div>`; lastDate = ds; }
 
         let statusHtml = '';
         if (canShowReceipt && isMe) {
             const cachedLastRead = localStorage.getItem(`megane_lastread_${currentConvId}_${currentOtherUid}`);
             const otherLastRead = cachedLastRead ? parseInt(cachedLastRead) : 0;
-            if (m.timestamp <= otherLastRead) {
-                statusHtml = '<span class="read-status read">✔️✔️</span>';
-            } else {
-                statusHtml = '<span class="read-status delivered">✔️</span>';
-            }
+            statusHtml = m.timestamp <= otherLastRead
+                ? '<span class="read-status read">✔️✔️</span>'
+                : '<span class="read-status delivered">✔️</span>';
         }
+
+        let errorHtml = m.error ? '<div style="font-size:0.55rem; color:#f87171; text-align:right;">❌</div>' : '';
+        let pendingHtml = m.pending ? '<div style="font-size:0.55rem; color:#f59e0b; text-align:right;">⏳</div>' : '';
 
         let imageHtml = '';
         if (m.imageUrl) {
-            imageHtml = `
-                <div class="msg-image">
-                    <img src="${m.imageUrl}" onclick="window.showFullImage('${m.imageUrl}')" style="max-width: 200px; max-height: 200px; border-radius: 12px; margin-bottom: 6px; cursor: pointer;">
-                </div>
-            `;
+            const src = m.pending ? (localStorage.getItem(`megane_local_${m.timestamp}`) || m.imageUrl) : m.imageUrl;
+            imageHtml = `<img src="${src}" onclick="window.showFullImage('${src}')" style="max-width:200px; max-height:200px; border-radius:12px; margin-bottom:4px; cursor:pointer; display:block;">`;
         }
 
         let audioHtml = '';
         if (m.audioUrl) {
-            audioHtml = `
-                <div class="msg-audio">
-                    <audio controls src="${m.audioUrl}">
-                        Votre navigateur ne supporte pas la lecture audio.
-                    </audio>
-                </div>
-            `;
+            const src = m.pending ? (localStorage.getItem(`megane_local_${m.timestamp}`) || m.audioUrl) : m.audioUrl;
+            audioHtml = `<audio controls src="${src}" style="max-width:200px; margin-bottom:4px;"></audio>`;
         }
 
-        const formatted = formatReplyMessage(m.text);
-        
-        if (formatted.isReply) {
+        const replyMatch = m.text ? m.text.match(/^\[Rép: "([^"]+)"\] (.*)/) : null;
+
+        if (replyMatch) {
             html += `
-                <div class="msg-row ${isMe ? 'sent' : 'recv'}" data-msg-id="${m.id}">
+                <div class="msg-row ${isMe ? 'sent' : 'recv'}">
                     <div class="reply-bubble">
-                        <div class="reply-quoted-header">
-                            <span class="reply-icon">⤴️</span>
-                            <span class="reply-quoted-label">En réponse à :</span>
-                        </div>
-                        <div class="reply-quoted-text">
-                            "${esc(formatted.quotedText)}"
-                        </div>
-                        <div class="reply-divider"></div>
-                        <div class="reply-new-message">
-                            ${imageHtml}
-                            ${audioHtml}
-                            ${formatted.replyText ? esc(formatted.replyText) : ''}
-                        </div>
+                        <div class="reply-quoted-text">${esc(replyMatch[1])}</div>
+                        ${imageHtml}
+                        ${audioHtml}
+                        <div class="reply-new-message">${esc(replyMatch[2] || '')}</div>
                     </div>
                     <div class="message-footer">
                         <div class="msg-time" data-timestamp="${m.timestamp || 0}">${fmtTime(m.timestamp)}</div>
                         ${statusHtml}
                     </div>
+                    ${errorHtml}
+                    ${pendingHtml}
+                </div>
+            `;
+        } else if (m.imageUrl || m.audioUrl) {
+            html += `
+                <div class="msg-row ${isMe ? 'sent' : 'recv'}">
+                    <div class="bubble" style="padding:4px; background:${isMe ? 'var(--sent)' : 'var(--s2)'};">
+                        ${imageHtml}
+                        ${audioHtml}
+                    </div>
+                    <div class="message-footer">
+                        <div class="msg-time" data-timestamp="${m.timestamp || 0}">${fmtTime(m.timestamp)}</div>
+                        ${statusHtml}
+                    </div>
+                    ${errorHtml}
+                    ${pendingHtml}
                 </div>
             `;
         } else {
             html += `
-                <div class="msg-row ${isMe ? 'sent' : 'recv'}" data-msg-id="${m.id}">
-                    <div class="bubble">
-                        ${imageHtml}
-                        ${audioHtml}
-                        ${formatted.originalText ? esc(formatted.originalText) : ''}
-                    </div>
+                <div class="msg-row ${isMe ? 'sent' : 'recv'}">
+                    <div class="bubble">${esc(m.text)}</div>
                     <div class="message-footer">
                         <div class="msg-time" data-timestamp="${m.timestamp || 0}">${fmtTime(m.timestamp)}</div>
                         ${statusHtml}
                     </div>
+                    ${errorHtml}
+                    ${pendingHtml}
                 </div>
             `;
         }
     });
 
-    container.innerHTML = html;
+    // Si c'est un append (un seul message), ne pas vider le conteneur
+    if (msgs.length === 1 && container.children.length > 0) {
+        container.innerHTML += html;
+    } else {
+        container.innerHTML = html;
+    }
     container.scrollTop = container.scrollHeight;
 }
 
@@ -1432,6 +1193,11 @@ window.showFullImage = function(url) {
     document.body.appendChild(modal);
 };
 
+window.openChatDirectly = (userId) => {
+    if (me && me.uid) startOrOpenChat(userId);
+    else setTimeout(() => { if (me && me.uid) startOrOpenChat(userId); }, 500);
+};
+
 // ==================== NETTOYAGE & NAVIGATION ====================
 function cleanupChat() {
     if (msgsRef) { msgsRef.off(); msgsRef = null; }
@@ -1443,54 +1209,43 @@ function cleanupChat() {
     }
     if (typingTimer) clearTimeout(typingTimer);
     if (currentConvId && me && !meSettings.disableTyping) db.ref(`typing/${currentConvId}/${me.uid}`).remove();
-    
-    // 🔥 Réinitialisation des variables
     currentConvId = null;
     currentOtherUid = null;
     replyToMessageData = null;
-    
     const quoteBar = document.getElementById('replyQuoteBar');
-    if (quoteBar) quoteBar.remove();
+    if (quoteBar) { quoteBar.style.display = 'none'; quoteBar.innerHTML = ''; }
 }
 
-function closeChat() {
-    cleanupChat();
-    
-    // 🔥 Réinitialisation supplémentaire
-    currentConvId = null;
-    currentOtherUid = null;
-    
-    showView('chatView');
-}
+function closeChat() { cleanupChat(); showView('chatView'); }
 
 function showView(viewId) {
     const currentActive = document.querySelector('.view.active');
     const nextView = document.getElementById(viewId);
     if (currentActive && currentActive.id === viewId) return;
-    if (currentActive) {
-        currentActive.classList.add('exit');
-        setTimeout(() => {
-            currentActive.classList.remove('exit');
-            currentActive.classList.remove('active');
-        }, 250);
-    }
+    if (currentActive) { currentActive.classList.add('exit'); setTimeout(() => { currentActive.classList.remove('exit', 'active'); }, 250); }
     if (nextView) nextView.classList.add('active');
 }
 
 async function logout() {
     cleanupChat();
     if (me) await db.ref(`users/${me.uid}/online`).set(false);
-    localStorage.removeItem('megane_logged_in');
-    localStorage.removeItem('megane_uid');
-    localStorage.removeItem('megane_discsMap');
-    localStorage.removeItem('megane_allUsers');
+    ['megane_logged_in', 'megane_uid', 'megane_discsMap', 'megane_allUsers'].forEach(k => localStorage.removeItem(k));
     await auth.signOut();
     window.location.href = 'auth.html';
 }
 
+async function deleteConversation(convId) {
+    if (!convId) return;
+    await db.ref(`messages/${convId}`).remove();
+    await db.ref(`conversations/${convId}`).remove();
+    localStorage.removeItem(`megane_messages_${convId}`);
+    document.getElementById('deleteModal').style.display = 'none';
+    pendingDeleteConvId = null;
+    if (currentConvId === convId) closeChat();
+}
+
 // ==================== VUE FIND USER ====================
 let findCurrentMode = "username";
-let findSearchTimeout = null;
 
 function initFindUserView() {
     const findSearchInput = document.getElementById('findSearchInput');
@@ -1499,174 +1254,96 @@ function initFindUserView() {
     const modeBtns = document.querySelectorAll('#findUserView .mode-btn');
     if (!findSearchInput) return;
 
-    findActionBtn.innerHTML = '<div class="spinner-small"></div>';
-    findActionBtn.classList.add('loader');
-    findActionBtn.disabled = true;
-
-    modeBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            modeBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            findCurrentMode = btn.dataset.mode;
-            if (findCurrentMode === 'username') {
-                findSearchInput.placeholder = "Nom d'utilisateur (ex: Jean)";
-                findActionBtn.innerHTML = '<div class="spinner-small"></div>';
-                findActionBtn.classList.add('loader');
-                findActionBtn.disabled = true;
-                findSearchInput.value = "";
-                findResultArea.innerHTML = "";
-            } else {
-                findSearchInput.placeholder = "Email exact (ex: jean@exemple.com)";
-                findActionBtn.innerHTML = '<i class="fas fa-search"></i> Find';
-                findActionBtn.classList.remove('loader');
-                findActionBtn.disabled = false;
-                findResultArea.innerHTML = "";
-            }
-        });
-    });
+    modeBtns.forEach(btn => btn.addEventListener('click', () => {
+        modeBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        findCurrentMode = btn.dataset.mode;
+        findSearchInput.placeholder = findCurrentMode === 'username' ? "Nom d'utilisateur (ex: Jean)" : "Email exact (ex: jean@exemple.com)";
+        findResultArea.innerHTML = "";
+        findSearchInput.value = "";
+    }));
 
     async function searchByUsername(query) {
         if (!query.trim()) { findResultArea.innerHTML = ""; return; }
-        const lowerQuery = query.toLowerCase();
-        const userId = me?.uid;
         const usersSnap = await db.ref('users').once('value');
         const users = usersSnap.val() || {};
         const results = [];
-
         for (const uid in users) {
-            if (uid === userId) continue;
+            if (uid === me?.uid) continue;
             const user = users[uid];
-            const username = user.username || user.email || "";
-            const settings = user.settings || {};
-            if (settings.findable === false) continue;
-            if (username.toLowerCase().includes(lowerQuery)) {
-                results.push({ uid, username, email: user.email, online: user.online || false, photoURL: user.photoURL || null });
+            if (user.settings?.findable === false) continue;
+            if ((user.username || '').toLowerCase().includes(query.toLowerCase())) {
+                results.push({ uid, username: user.username, email: user.email, online: user.online || false, photoURL: user.photoURL || null });
             }
         }
-
-        if (results.length === 0) {
-            findResultArea.innerHTML = `<div class="error-message"><i class="fas fa-user-slash"></i> Aucun utilisateur trouvé</div>`;
-            return;
-        }
-
-        let html = `<div class="results-list">`;
-        results.forEach(u => {
-            const statusClass = u.online ? 'status-online' : 'status-offline';
-            const statusText = u.online ? '🟢 En ligne' : '⚫ Hors ligne';
-            html += `
-                <div class="result-item" data-user-id="${u.uid}">
-                    <div class="result-avatar" style="cursor:pointer;" data-user-id="${u.uid}">
-                        ${u.photoURL ? `<img src="${u.photoURL}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : (u.username.charAt(0).toUpperCase())}
-                    </div>
-                    <div class="result-info" style="cursor:pointer;" data-user-id="${u.uid}">
-                        <div class="result-name">${esc(u.username)}</div>
-                        <div class="result-status"><span class="${statusClass}">${statusText}</span></div>
-                    </div>
-                    <button class="chat-mini-btn" data-uid="${u.uid}">Chat</button>
+        if (!results.length) { findResultArea.innerHTML = '<div class="error-message"><i class="fas fa-user-slash"></i> Aucun utilisateur trouvé</div>'; return; }
+        findResultArea.innerHTML = results.map(u => `
+            <div class="result-item" data-user-id="${u.uid}">
+                <div class="result-avatar" style="cursor:pointer;" data-user-id="${u.uid}">${u.photoURL ? `<img src="${u.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : u.username.charAt(0).toUpperCase()}</div>
+                <div class="result-info" style="cursor:pointer;" data-user-id="${u.uid}">
+                    <div class="result-name">${esc(u.username)}</div>
+                    <div class="result-status"><span class="${u.online ? 'status-online' : 'status-offline'}">${u.online ? '🟢 En ligne' : '⚫ Hors ligne'}</span></div>
                 </div>
-            `;
-        });
-        html += `</div>`;
-        findResultArea.innerHTML = html;
-
-        document.querySelectorAll('#findResultArea .chat-mini-btn').forEach(btn => {
-            btn.addEventListener('click', () => startOrOpenChat(btn.dataset.uid));
-        });
-        document.querySelectorAll('#findResultArea .result-avatar, #findResultArea .result-info').forEach(el => {
-            el.addEventListener('click', () => {
-                const userId = el.dataset.userId;
-                if (userId) showUserInfo(userId, 'findUserView');
-            });
-        });
+                <button class="chat-mini-btn" data-uid="${u.uid}">Chat</button>
+            </div>
+        `).join('');
+        document.querySelectorAll('#findResultArea .chat-mini-btn').forEach(b => b.addEventListener('click', () => startOrOpenChat(b.dataset.uid)));
+        document.querySelectorAll('#findResultArea .result-avatar, #findResultArea .result-info').forEach(el => el.addEventListener('click', () => showUserInfo(el.dataset.userId, 'findUserView')));
     }
 
     async function searchByEmail(email) {
-        if (!email.trim()) {
-            findResultArea.innerHTML = `<div class="error-message">Veuillez entrer un email</div>`;
-            return;
-        }
+        if (!email.trim()) { findResultArea.innerHTML = '<div class="error-message">Veuillez entrer un email</div>'; return; }
         const usersSnap = await db.ref('users').once('value');
         const users = usersSnap.val() || {};
-        let foundUser = null;
-
+        let found = null;
         for (const uid in users) {
-            const user = users[uid];
-            if (user.email && user.email.toLowerCase() === email.toLowerCase()) {
-                const settings = user.settings || {};
-                if (settings.findable === false) continue;
-                foundUser = { uid, ...user };
-                break;
-            }
+            if (users[uid].email?.toLowerCase() === email.toLowerCase() && users[uid].settings?.findable !== false) { found = { uid, ...users[uid] }; break; }
         }
-
-        if (!foundUser) {
-            findResultArea.innerHTML = `<div class="error-message"><i class="fas fa-user-slash"></i> Aucun utilisateur ne correspond à cet email</div>`;
-            return;
-        }
-
-        const statusClass = foundUser.online ? 'status-online' : 'status-offline';
-        const statusText = foundUser.online ? '🟢 En ligne' : '⚫ Hors ligne';
+        if (!found) { findResultArea.innerHTML = '<div class="error-message"><i class="fas fa-user-slash"></i> Aucun utilisateur trouvé</div>'; return; }
         findResultArea.innerHTML = `
-            <div class="profile-card" data-user-id="${foundUser.uid}">
-                <div class="profile-avatar" style="cursor:pointer;" data-user-id="${foundUser.uid}">
-                    ${foundUser.photoURL ? `<img src="${foundUser.photoURL}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">` : (foundUser.username?.charAt(0)?.toUpperCase() || '?')}
+            <div class="profile-card" data-user-id="${found.uid}">
+                <div class="profile-avatar" style="cursor:pointer;" data-user-id="${found.uid}">${found.photoURL ? `<img src="${found.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : (found.username?.charAt(0)?.toUpperCase() || '?')}</div>
+                <div class="profile-info" style="cursor:pointer;" data-user-id="${found.uid}">
+                    <div class="profile-name">${esc(found.username || found.email)}</div>
+                    <div class="profile-email">${esc(found.email)}</div>
+                    <div class="profile-status ${found.online ? 'status-online' : 'status-offline'}">${found.online ? '🟢 En ligne' : '⚫ Hors ligne'}</div>
                 </div>
-                <div class="profile-info" style="cursor:pointer;" data-user-id="${foundUser.uid}">
-                    <div class="profile-name">${esc(foundUser.username || foundUser.email)}</div>
-                    <div class="profile-email">${esc(foundUser.email)}</div>
-                    <div class="profile-status ${statusClass}">${statusText}</div>
-                </div>
-                <button class="chat-btn" data-uid="${foundUser.uid}">Chat</button>
+                <button class="chat-btn" data-uid="${found.uid}">Chat</button>
             </div>
         `;
-        const chatBtn = findResultArea.querySelector('.chat-btn');
-        if (chatBtn) chatBtn.addEventListener('click', () => startOrOpenChat(chatBtn.dataset.uid));
-        document.querySelectorAll('#findResultArea .profile-avatar, #findResultArea .profile-info').forEach(el => {
-            el.addEventListener('click', () => {
-                const userId = el.dataset.userId;
-                if (userId) showUserInfo(userId, 'findUserView');
-            });
-        });
+        document.querySelector('#findResultArea .chat-btn')?.addEventListener('click', () => startOrOpenChat(found.uid));
+        document.querySelectorAll('#findResultArea .profile-avatar, #findResultArea .profile-info').forEach(el => el.addEventListener('click', () => showUserInfo(el.dataset.userId, 'findUserView')));
     }
 
+    let findTimeout;
     findSearchInput.addEventListener('input', (e) => {
-        if (findCurrentMode === 'username') {
-            if (findSearchTimeout) clearTimeout(findSearchTimeout);
-            findSearchTimeout = setTimeout(() => searchByUsername(e.target.value), 200);
-        }
+        if (findCurrentMode === 'username') { clearTimeout(findTimeout); findTimeout = setTimeout(() => searchByUsername(e.target.value), 200); }
     });
-
-    findActionBtn.addEventListener('click', () => {
-        if (findCurrentMode === 'email') searchByEmail(findSearchInput.value);
-        else searchByUsername(findSearchInput.value);
-    });
+    findActionBtn.addEventListener('click', () => findCurrentMode === 'email' ? searchByEmail(findSearchInput.value) : searchByUsername(findSearchInput.value));
 }
 
 // ==================== ÉVÉNEMENTS ====================
-document.getElementById('plusBtn')?.addEventListener('click', () => { showView('findUserView'); setTimeout(() => initFindUserView(), 50); });
+document.getElementById('plusBtn')?.addEventListener('click', () => { showView('findUserView'); setTimeout(initFindUserView, 50); });
 document.getElementById('backFromFindBtn')?.addEventListener('click', () => showView('chatView'));
 document.getElementById('settingsBtnHeader')?.addEventListener('click', () => showView('settingsView'));
 document.getElementById('backFromSettingsBtn')?.addEventListener('click', () => showView('chatView'));
 document.getElementById('backBtn')?.addEventListener('click', closeChat);
+
 document.getElementById('saveProfileBtn')?.addEventListener('click', () => {
     const newUsername = document.getElementById('usernameInput')?.value.trim();
     if (newUsername && me) {
         localStorage.setItem('megane_username', newUsername);
-        document.getElementById('avatarInitial').innerText = newUsername.charAt(0).toUpperCase();
+        const avatarInitial = document.getElementById('avatarInitial');
+        if (avatarInitial) avatarInitial.textContent = newUsername.charAt(0).toUpperCase();
         db.ref(`users/${me.uid}/username`).set(newUsername);
         showBanner("Profil mis à jour !", "success");
     }
 });
 
-const avatarBtn = document.getElementById('avatarBtn');
-if (avatarBtn) {
-    avatarBtn.addEventListener('click', () => showAvatarSelector());
-}
+document.getElementById('avatarBtn')?.addEventListener('click', showAvatarSelector);
 
-const volumeSlider = document.getElementById('volumeSlider');
-const vibrationSlider = document.getElementById('vibrationSlider');
-if (volumeSlider) volumeSlider.addEventListener('input', (e) => saveVolume(parseInt(e.target.value)));
-if (vibrationSlider) vibrationSlider.addEventListener('input', (e) => saveVibration(parseInt(e.target.value)));
+document.getElementById('volumeSlider')?.addEventListener('input', (e) => saveVolume(parseInt(e.target.value)));
+document.getElementById('vibrationSlider')?.addEventListener('input', (e) => saveVibration(parseInt(e.target.value)));
 
 const logoutOverlay = document.getElementById('confirmLogoutOverlay');
 document.getElementById('logoutBtn')?.addEventListener('click', () => { if (logoutOverlay) logoutOverlay.style.display = 'flex'; });
@@ -1677,53 +1354,32 @@ const deleteModal = document.getElementById('deleteModal');
 document.getElementById('confirmDeleteBtn')?.addEventListener('click', () => { if (pendingDeleteConvId) deleteConversation(pendingDeleteConvId); });
 document.getElementById('cancelDeleteBtn')?.addEventListener('click', () => { if (deleteModal) deleteModal.style.display = 'none'; pendingDeleteConvId = null; });
 
-document.getElementById('chatSearch')?.addEventListener('input', () => renderDiscs());
+document.getElementById('chatSearch')?.addEventListener('input', renderDiscs);
 document.getElementById('sendBtn')?.addEventListener('click', sendMessage);
 
-// Événements pour l'envoi d'images
-const attachImageBtn = document.getElementById('attachImageBtn');
-const imageInput = document.getElementById('imageInput');
-if (attachImageBtn && imageInput) {
-    attachImageBtn.addEventListener('click', () => {
-        imageInput.click();
-    });
-    imageInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-            if (file.size > 10 * 1024 * 1024) {
-                showBanner("Image trop volumineuse (max 10 Mo)", "error");
-                return;
-            }
-            sendImageMessage(file);
-        }
-        imageInput.value = '';
-    });
-}
+document.getElementById('attachImageBtn')?.addEventListener('click', () => document.getElementById('imageInput').click());
+document.getElementById('imageInput')?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) { if (file.size > 10*1024*1024) { showBanner("Image trop volumineuse (max 10 Mo)", "error"); return; } sendImageMessage(file); }
+    e.target.value = '';
+});
 
-// Événements pour l'enregistrement audio
-const attachAudioBtn = document.getElementById('attachAudioBtn');
-const attachAudioStopBtn = document.getElementById('attachAudioStopBtn');
-if (attachAudioBtn) {
-    attachAudioBtn.addEventListener('click', startRecording);
-}
-if (attachAudioStopBtn) {
-    attachAudioStopBtn.addEventListener('click', stopRecording);
-}
+document.getElementById('attachAudioBtn')?.addEventListener('click', startRecordingFlow);
+document.getElementById('attachAudioStopBtn')?.addEventListener('click', pauseRecording);
+document.getElementById('sendBtn')?.addEventListener('click', () => {
+    if (isPaused || audioRecordBlob) { sendAudioFromRecording(); return; }
+    sendMessage();
+});
 
-const footerBarElem = document.getElementById('footerBar');
-if (footerBarElem) {
-    footerBarElem.addEventListener('click', async () => {
-        if (lastTempSenderId && currentConvId !== lastTempSenderId) {
-            let targetConvId = null;
-            for (const [cid, disc] of Object.entries(discsMap)) if (disc.otherId === lastTempSenderId) { targetConvId = cid; break; }
-            if (targetConvId) openChat(targetConvId, lastTempSenderId);
-            else startOrOpenChat(lastTempSenderId);
-        }
-    });
-}
+document.getElementById('footerBar')?.addEventListener('click', async () => {
+    if (lastTempSenderId && currentConvId !== lastTempSenderId) {
+        let targetConvId = null;
+        for (const [cid, disc] of Object.entries(discsMap)) if (disc.otherId === lastTempSenderId) { targetConvId = cid; break; }
+        targetConvId ? openChat(targetConvId, lastTempSenderId) : startOrOpenChat(lastTempSenderId);
+    }
+});
 
-const msgInputField = document.getElementById('msgInput');
-msgInputField?.addEventListener('input', function() {
+document.getElementById('msgInput')?.addEventListener('input', function() {
     this.style.height = 'auto';
     this.style.height = Math.min(this.scrollHeight, 90) + 'px';
     if (!currentConvId || !me || meSettings.disableTyping) return;

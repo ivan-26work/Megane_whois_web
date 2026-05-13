@@ -1,5 +1,5 @@
 // ============================================
-// FIREBASE CONFIGURATION (version Web)
+// FIREBASE CONFIGURATION
 // ============================================
 
 const firebaseConfig = {
@@ -12,58 +12,60 @@ const firebaseConfig = {
     appId: "1:276812426291:web:c4688a1ec5c06161d20746"
 };
 
-// Initialiser Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Exporter les services Firebase
 window.auth = firebase.auth();
 window.db = firebase.database();
 window.storage = firebase.storage();
 window.messaging = firebase.messaging();
 
 // ============================================
-// 🔥 NOTIFICATIONS PUSH (FCM Web)
+// 🔥 RÉCUPÉRATION ET ENREGISTREMENT DU TOKEN FCM
 // ============================================
 
-async function initFCM() {
+const VAPID_KEY = "BEERdguMh1ryvlgKUM7QVf0heP2pFVMArUvuMeeOtEobmg4vHf9NWwem6EP6seh5Sf0tJrqdH5P2ZXCY2iMUmGU";
+
+async function saveFCMToken(userId) {
+    if (!window.messaging) {
+        console.warn("⚠️ Firebase Messaging non disponible");
+        return null;
+    }
+
     try {
-        // 🔥 Forcer l'environnement pour éviter l'erreur Notification
-        const originalNotification = window.Notification;
-        window.Notification = {
-            permission: 'granted',
-            requestPermission: () => Promise.resolve('granted')
-        };
+        const token = await window.messaging.getToken({ vapidKey: VAPID_KEY });
         
-        const token = await window.messaging.getToken({
-            vapidKey: 'BEERdguMh1ryvlgKUM7QVf0heP2pFVMArUvuMeeOtEobmg4vHf9NWwem6EP6seh5Sf0tJrqdH5P2ZXCY2iMUmGU'
-        });
-        
-        // Restaurer l'original
-        window.Notification = originalNotification;
-        
-        console.log('✅ Token FCM:', token);
-        
-        const user = firebase.auth().currentUser;
-        if (user) {
-            await db.ref(`fcmTokens/${user.uid}/${token}`).set(true);
-            console.log('✅ Token FCM enregistré');
+        if (!token) {
+            console.warn("⚠️ Aucun token FCM obtenu");
+            return null;
         }
+
+        console.log("✅ Token FCM récupéré :", token);
+
+        await window.db.ref(`fcmTokens/${userId}/${token}`).set(true);
+        console.log("✅ Token FCM enregistré dans Firebase");
+
+        return token;
     } catch (error) {
-        console.error('❌ Erreur FCM:', error);
+        console.error("❌ Erreur FCM :", error);
+        return null;
     }
 }
 
-// Lancer FCM dès que possible
-if ('serviceWorker' in navigator) {
-    // Attendre que l'utilisateur soit connecté
-    firebase.auth().onAuthStateChanged(user => {
-        if (user) {
-            initFCM();
-        }
-    });
-}
+// ============================================
+// LANCEMENT APRÈS CONNEXION
+// ============================================
+window.auth.onAuthStateChanged(async (user) => {
+    if (user) {
+        console.log("👤 Utilisateur connecté :", user.uid);
+        await saveFCMToken(user.uid);
+    } else {
+        console.log("👤 Aucun utilisateur connecté");
+    }
+});
 
-// Fonctions auth (compatibles)
+// ============================================
+// FONCTIONS AUTH (compatibilité)
+// ============================================
 window.firebaseSignIn = (auth, email, password) => auth.signInWithEmailAndPassword(email, password);
 window.firebaseCreateUser = (auth, email, password) => auth.createUserWithEmailAndPassword(email, password);
 window.firebaseResetPassword = (auth, email) => auth.sendPasswordResetEmail(email);
@@ -74,4 +76,4 @@ window.firebaseStorageRef = (storage, path) => storage.ref(path);
 window.firebaseUploadBytes = (ref, file) => ref.put(file);
 window.firebaseGetDownloadURL = (ref) => ref.getDownloadURL();
 
-console.log('✅ Firebase initialisé (sans erreur Notification)');
+console.log("✅ firebase-config.js chargé (avec ta clé VAPID)");

@@ -1,5 +1,5 @@
 // ===============================================
-// AUTH.JS - VERSION FINALE COMPLÈTE
+// AUTH.JS - VERSION WEB AVEC NOTIFICATIONS DANS LA BARRE
 // ===============================================
 
 // État
@@ -39,6 +39,9 @@ const usernameError = document.getElementById('usernameError');
 const cancelUsernameBtn = document.getElementById('cancelUsernameBtn');
 const confirmUsernameBtn = document.getElementById('confirmUsernameBtn');
 
+// 🔑 Clé VAPID (notifications push)
+const VAPID_KEY = "BEERdguMh1ryvlgKUM7QVf0heP2pFVMArUvuMeeOtEobmg4vHf9NWwem6EP6seh5Sf0tJrqdH5P2ZXCY2iMUmGU";
+
 // ===============================================
 // BANDE D'INFORMATION
 // ===============================================
@@ -67,7 +70,7 @@ function updateStepProgress() {
 }
 
 // ===============================================
-// SAUVEGARDE LOCALE (état de l'UI)
+// SAUVEGARDE LOCALE
 // ===============================================
 function saveState() {
     localStorage.setItem('megane_state_tab', currentTab);
@@ -261,15 +264,51 @@ function checkPasswordStrength(password) {
 }
 
 // ===============================================
-// BRIDGE ANDROID — ENREGISTREMENT TOKEN FCM
+// 🔥 ENREGISTREMENT DU TOKEN FCM (VERSION WEB)
 // ===============================================
-function notifyAndroidUserLoggedIn(userId) {
-    if (!window.AndroidBridge || typeof window.AndroidBridge.onUserLoggedIn !== 'function') {
-        console.warn('⚠️ Bridge Android non disponible (normal hors app)');
-        return;
+async function saveFCMToken(userId) {
+    // Afficher le début de l'opération
+    showBanner('🔐 Enregistrement du token FCM...', 'progress', true, 30);
+    
+    if (!window.messaging) {
+        console.warn("⚠️ Firebase Messaging non disponible");
+        showBanner('❌ Firebase Messaging non disponible', 'error');
+        return null;
     }
-    window.AndroidBridge.onUserLoggedIn(userId);
-    console.log('✅ UID envoyé au bridge Android:', userId);
+
+    // Contourner l'erreur Notification is not defined
+    const originalNotification = window.Notification;
+    window.Notification = {
+        permission: 'granted',
+        requestPermission: () => Promise.resolve('granted')
+    };
+
+    try {
+        const token = await window.messaging.getToken({ vapidKey: VAPID_KEY });
+        
+        // Restaurer l'original
+        window.Notification = originalNotification;
+        
+        if (!token) {
+            console.warn("⚠️ Aucun token FCM obtenu");
+            showBanner('⚠️ Aucun token FCM obtenu - Vérifie la clé VAPID', 'error');
+            return null;
+        }
+
+        console.log("✅ Token FCM récupéré :", token);
+        showBanner('📱 Token FCM récupéré, sauvegarde en cours...', 'progress', true, 60);
+
+        await window.db.ref(`fcmTokens/${userId}/${token}`).set(true);
+        console.log("✅ Token FCM enregistré dans Firebase");
+        showBanner('✅ Token FCM enregistré ! Prêt à recevoir des notifications', 'success', true, 100);
+
+        return token;
+    } catch (error) {
+        window.Notification = originalNotification;
+        console.error("❌ Erreur FCM :", error);
+        showBanner(`❌ Erreur FCM : ${error.message}`, 'error');
+        return null;
+    }
 }
 
 // ===============================================
@@ -279,6 +318,7 @@ async function updateUsernameAndRedirect(user) {
     const newUsername = usernameInput.value.trim();
     if (newUsername.length < 2) {
         if (usernameError) usernameError.style.display = 'block';
+        showBanner('Le pseudo doit contenir au moins 2 caractères', 'error');
         return false;
     }
     if (usernameError) usernameError.style.display = 'none';
@@ -292,10 +332,13 @@ async function updateUsernameAndRedirect(user) {
         localStorage.setItem('megane_logged_in', 'true');
         localStorage.setItem('megane_uid', user.uid);
 
+        showBanner('✅ Pseudo mis à jour ! Enregistrement du token...', 'success', true, 50);
+        await saveFCMToken(user.uid);
+
         return true;
     } catch (err) {
         console.error('Erreur mise à jour username:', err);
-        showBanner('Erreur lors de la mise à jour du pseudo.', 'error');
+        showBanner('❌ Erreur lors de la mise à jour du pseudo', 'error');
         return false;
     }
 }
@@ -316,12 +359,13 @@ async function uploadProfilePhoto(userId, file) {
 }
 
 async function createAccount() {
-    showBanner('Création du compte en cours...', 'progress', true, 90);
+    showBanner('Création du compte en cours...', 'progress', true, 30);
     if (loadingModal) loadingModal.style.display = 'flex';
 
     try {
         const userCredential = await window.firebaseCreateUser(window.auth, userData.email, userData.password);
         const user = userCredential.user;
+        showBanner('✅ Compte créé ! Sauvegarde des infos...', 'progress', true, 60);
 
         let photoURL = null;
         if (userData.profilePic) {
@@ -351,6 +395,9 @@ async function createAccount() {
         if (photoURL) localStorage.setItem('megane_photoURL', photoURL);
         localStorage.setItem('lastUser', JSON.stringify({ email: userData.email, username: userData.username }));
 
+        showBanner('📱 Enregistrement du token FCM...', 'progress', true, 80);
+        await saveFCMToken(user.uid);
+
         if (loadingModal) loadingModal.style.display = 'none';
         showBanner('✅ Compte créé avec succès !', 'success', true, 100);
 
@@ -364,7 +411,7 @@ async function createAccount() {
         if (error.code === 'auth/email-already-in-use') {
             showBanner('Cet email est déjà utilisé.', 'error');
         } else {
-            showBanner('Erreur lors de la création du compte.', 'error');
+            showBanner(`❌ Erreur: ${error.message}`, 'error');
         }
     }
 }
@@ -381,11 +428,12 @@ async function login() {
         return;
     }
 
-    showBanner('Connexion en cours...', 'progress', true, 50);
+    showBanner('Connexion en cours...', 'progress', true, 30);
 
     try {
         const userCredential = await window.firebaseSignIn(window.auth, email, password);
         const user = userCredential.user;
+        showBanner('✅ Connecté ! Chargement du profil...', 'progress', true, 60);
 
         const userSnap = await window.db.ref(`users/${user.uid}`).once('value');
         const userInfo = userSnap.val() || {};
@@ -398,6 +446,9 @@ async function login() {
         if (userInfo.photoURL) localStorage.setItem('megane_photoURL', userInfo.photoURL);
         localStorage.setItem('lastUser', JSON.stringify({ email }));
 
+        showBanner('📱 Enregistrement du token FCM...', 'progress', true, 80);
+        await saveFCMToken(user.uid);
+
         pendingUser = user;
         isLoginFlow = true;
         successOverlay.style.display = 'flex';
@@ -407,7 +458,7 @@ async function login() {
         if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
             showBanner('Email ou mot de passe incorrect.', 'error');
         } else {
-            showBanner('Erreur de connexion.', 'error');
+            showBanner(`❌ Erreur: ${error.message}`, 'error');
         }
     }
 }
@@ -431,7 +482,8 @@ if (continueOverlayBtn) {
         }
 
         if (acceptNotifs.checked && pendingUser) {
-            notifyAndroidUserLoggedIn(pendingUser.uid);
+            showBanner('📱 Enregistrement du token FCM...', 'progress', true, 50);
+            await saveFCMToken(pendingUser.uid);
         }
 
         if (isLoginFlow && pendingUser) {
@@ -447,6 +499,7 @@ if (continueOverlayBtn) {
                 localStorage.setItem('megane_uid', pendingUser.uid);
                 localStorage.setItem('megane_username', userData.username || usernameInput.value);
                 localStorage.setItem('megane_email', userData.email || document.getElementById('loginEmail')?.value);
+                await saveFCMToken(pendingUser.uid);
             }
             window.location.href = 'index.html';
         }
@@ -471,6 +524,7 @@ if (confirmUsernameBtn) {
             const newUsername = usernameInput.value.trim();
             localStorage.setItem('megane_username', newUsername);
             localStorage.setItem('megane_logged_in', 'true');
+            await saveFCMToken(pendingUser.uid);
             window.location.href = 'index.html';
         }
     });
@@ -534,7 +588,7 @@ if (photoInput) {
             const reader = new FileReader();
             reader.onload = (event) => {
                 profileCircle.innerHTML = `<img src="${event.target.result}">`;
-                showBanner('Photo ajoutée (facultative) !', 'success');
+                showBanner('✅ Photo ajoutée (facultative) !', 'success');
                 saveState();
             };
             reader.readAsDataURL(file);
