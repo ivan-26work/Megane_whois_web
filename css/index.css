@@ -1,3 +1,6 @@
+/* ============================================
+   VARIABLES & THÈMES
+   ============================================ */
 :root {
     --bg:      #090d14;
     --s1:      #0e1520;
@@ -11,10 +14,12 @@
     --text2:   #7a90a8;
     --online:  #34d399;
     --danger:  #f87171;
-    --r: 20px;
+    --r:       20px;
+    --transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    --tap-scale: 0.98;
 }
 
-/* THÈMES (appliqués dynamiquement sur body) */
+/* Thèmes */
 body.theme-nuit {
     --bg: #090d14;
     --s1: #0e1520;
@@ -26,6 +31,15 @@ body.theme-nuit {
     --text: #e8edf5;
     --text2: #7a90a8;
     --sent: #1a4fd6;
+    --grad-start: #0a0f1a;
+    --grad-end: #0e1a26;
+    --footer-bg: #0e1a26;
+    --footer-border: #2a3a4a;
+    --temp-sender: #3b8bff;
+    --temp-msg: #ffffff;
+    --badge-bg: #1e2a3a;
+    --badge-text: #3b8bff;
+    --clock-color: #5eead4;
 }
 
 body.theme-jour {
@@ -39,6 +53,15 @@ body.theme-jour {
     --text: #1e293b;
     --text2: #475569;
     --sent: #2563eb;
+    --grad-start: #eef2ff;
+    --grad-end: #f8fafc;
+    --footer-bg: #ffffff;
+    --footer-border: #cbd5e1;
+    --temp-sender: #3b8bff;
+    --temp-msg: #1e293b;
+    --badge-bg: #e2e8f0;
+    --badge-text: #3b8bff;
+    --clock-color: #2563eb;
 }
 
 body.theme-rose-bleu {
@@ -52,6 +75,15 @@ body.theme-rose-bleu {
     --text: #831843;
     --text2: #9d174d;
     --sent: #db2777;
+    --grad-start: #fdf2f8;
+    --grad-end: #fce7f3;
+    --footer-bg: #ffffff;
+    --footer-border: #f9a8d4;
+    --temp-sender: #db2777;
+    --temp-msg: #831843;
+    --badge-bg: #fce7f3;
+    --badge-text: #db2777;
+    --clock-color: #db2777;
 }
 
 body.theme-bleu-blanc {
@@ -65,17 +97,173 @@ body.theme-bleu-blanc {
     --text: #0f172a;
     --text2: #334155;
     --sent: #0284c7;
+    --grad-start: #f0f9ff;
+    --grad-end: #e0f2fe;
+    --footer-bg: #ffffff;
+    --footer-border: #7dd3fc;
+    --temp-sender: #0284c7;
+    --temp-msg: #0f172a;
+    --badge-bg: #e0f2fe;
+    --badge-text: #0284c7;
+    --clock-color: #0284c7;
 }
 
+/* Thèmes supplémentaires (vert, violet, orange, rouge, jaune, cyan) */
+body.theme-vert-menthe {
+    --bg: #ecfdf5;
+    --s1: #ffffff;
+    --s2: #d1fae5;
+    --s3: #a7f3d0;
+    --border: #6ee7b7;
+    --accent: #10b981;
+    --accent2: #34d399;
+    --text: #064e3b;
+    --text2: #047857;
+    --sent: #059669;
+    --grad-start: #ecfdf5;
+    --grad-end: #d1fae5;
+    --footer-bg: #ffffff;
+    --footer-border: #6ee7b7;
+    --temp-sender: #10b981;
+    --temp-msg: #064e3b;
+    --badge-bg: #d1fae5;
+    --badge-text: #059669;
+    --clock-color: #059669;
+}
+body.theme-violet-profond {
+    --bg: #f5f3ff;
+    --s1: #ffffff;
+    --s2: #ede9fe;
+    --s3: #ddd6fe;
+    --border: #c4b5fd;
+    --accent: #8b5cf6;
+    --accent2: #a78bfa;
+    --text: #4c1d95;
+    --text2: #6d28d9;
+    --sent: #7c3aed;
+    --grad-start: #f5f3ff;
+    --grad-end: #ede9fe;
+    --footer-bg: #ffffff;
+    --footer-border: #c4b5fd;
+    --temp-sender: #8b5cf6;
+    --temp-msg: #4c1d95;
+    --badge-bg: #ede9fe;
+    --badge-text: #7c3aed;
+    --clock-color: #7c3aed;
+}
+body.theme-orange-solaire {
+    --bg: #fff7ed;
+    --s1: #ffffff;
+    --s2: #ffedd5;
+    --s3: #fed7aa;
+    --border: #fdba74;
+    --accent: #f97316;
+    --accent2: #fb923c;
+    --text: #9a3412;
+    --text2: #c2410c;
+    --sent: #ea580c;
+    --grad-start: #fff7ed;
+    --grad-end: #ffedd5;
+    --footer-bg: #ffffff;
+    --footer-border: #fdba74;
+    --temp-sender: #f97316;
+    --temp-msg: #9a3412;
+    --badge-bg: #ffedd5;
+    --badge-text: #ea580c;
+    --clock-color: #ea580c;
+}
+body.theme-rouge-passion {
+    --bg: #fef2f2;
+    --s1: #ffffff;
+    --s2: #fee2e2;
+    --s3: #fecaca;
+    --border: #fca5a5;
+    --accent: #ef4444;
+    --accent2: #f87171;
+    --text: #7f1d1d;
+    --text2: #b91c1c;
+    --sent: #dc2626;
+    --grad-start: #fef2f2;
+    --grad-end: #fee2e2;
+    --footer-bg: #ffffff;
+    --footer-border: #fca5a5;
+    --temp-sender: #ef4444;
+    --temp-msg: #7f1d1d;
+    --badge-bg: #fee2e2;
+    --badge-text: #dc2626;
+    --clock-color: #dc2626;
+}
+body.theme-jaune-miel {
+    --bg: #fefce8;
+    --s1: #ffffff;
+    --s2: #fef9c3;
+    --s3: #fef08a;
+    --border: #fde047;
+    --accent: #eab308;
+    --accent2: #facc15;
+    --text: #713f12;
+    --text2: #a16207;
+    --sent: #ca8a04;
+    --grad-start: #fefce8;
+    --grad-end: #fef9c3;
+    --footer-bg: #ffffff;
+    --footer-border: #fde047;
+    --temp-sender: #eab308;
+    --temp-msg: #713f12;
+    --badge-bg: #fef9c3;
+    --badge-text: #ca8a04;
+    --clock-color: #ca8a04;
+}
+body.theme-cyan-electrique {
+    --bg: #ecfeff;
+    --s1: #ffffff;
+    --s2: #cffafe;
+    --s3: #a5f3fc;
+    --border: #67e8f9;
+    --accent: #06b6d4;
+    --accent2: #22d3ee;
+    --text: #164e63;
+    --text2: #155e75;
+    --sent: #0891b2;
+    --grad-start: #ecfeff;
+    --grad-end: #cffafe;
+    --footer-bg: #ffffff;
+    --footer-border: #67e8f9;
+    --temp-sender: #06b6d4;
+    --temp-msg: #164e63;
+    --badge-bg: #cffafe;
+    --badge-text: #0891b2;
+    --clock-color: #0891b2;
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+/* ============================================
+   RESET & BASE
+   ============================================ */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+input, textarea {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
 }
 
 body {
     font-family: 'Nunito', sans-serif;
-    background: var(--bg);
+    /* 🔥 SUPPRESSION de background: var(--bg) pour éviter le flash */
+    /* La couleur est maintenant appliquée directement par le script dans index.html */
     color: var(--text);
     height: 100vh;
     width: 100%;
@@ -85,7 +273,7 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: none !important; /* Désactive toute transition sur le body */
 }
 
 .app {
@@ -96,95 +284,124 @@ body {
     overflow: hidden;
 }
 
-/* ===== VUES ===== */
+/* ============================================
+   VUES & TRANSITIONS DOUCES
+   ============================================ */
 .view {
     display: none;
     flex-direction: column;
     flex: 1;
     height: 100%;
     overflow: hidden;
+    opacity: 1;
+    transition: opacity 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1), visibility 0.2s;
 }
 .view.active {
     display: flex;
 }
+.view.exit {
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: inherit;
+    z-index: 10;
+}
 
-/* ===== HEADER COMMUN ===== */
-.header, .header-settings {
+/* ============================================
+   HEADERS
+   ============================================ */
+.header, .header-settings, .chat-header {
     background: var(--s1);
     border-bottom: 1px solid var(--border);
-    padding: 12px 16px;
+    border-radius: 30px;
+    margin: 12px 12px 0 12px;
+    padding: 12px 18px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     flex-shrink: 0;
 }
-.logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
+
+.back-btn, .back-btn-settings {
+    background: none;
+    border: none;
+    color: var(--accent);
     font-size: 1.3rem;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    white-space: nowrap;
+    cursor: pointer;
+    padding: 8px 12px 8px 0;
+    transition: transform 0.1s ease;
 }
+.back-btn:active, .back-btn-settings:active {
+    transform: scale(0.92);
+}
+
+.plus-btn-header {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.12s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.plus-btn-header:active {
+    transform: scale(0.92);
+}
+
 .searchbar {
     flex: 1;
     background: var(--s2);
     border: 1px solid var(--border);
     border-radius: 40px;
-    padding: 10px 14px;
+    padding: 10px 16px;
     display: flex;
     align-items: center;
     gap: 8px;
+    transition: border-color 0.15s ease;
 }
-.searchbar i {
-    color: var(--text2);
-    font-size: 0.9rem;
+.searchbar:focus-within {
+    border-color: var(--accent);
 }
 .searchbar input {
     background: none;
     border: none;
     outline: none;
     color: var(--text);
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     width: 100%;
 }
+
 .btn-settings {
     background: none;
     border: 1px solid var(--border);
     color: var(--text2);
     border-radius: 40px;
-    padding: 8px 14px;
-    font-size: 0.8rem;
+    padding: 10px 18px;
+    font-size: 0.9rem;
     cursor: pointer;
     font-weight: 600;
     white-space: nowrap;
-    transition: 0.2s;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
-.btn-settings:hover {
-    background: var(--s2);
-    color: var(--accent);
+.btn-settings:active {
+    transform: scale(0.96);
 }
+.btn-settings:hover { background: var(--s2); color: var(--accent); }
 
-/* ===== HEADER PARAMÈTRES ===== */
-.back-btn-settings {
-    background: none;
-    border: none;
-    color: var(--accent);
-    font-size: 1.2rem;
-    cursor: pointer;
-    padding: 4px 8px 4px 0;
-}
-.title-settings {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: var(--text);
-}
-
-/* ===== LISTES (discussions / recherche) ===== */
+/* ============================================
+   LISTES (discussions)
+   ============================================ */
 .list-container {
     flex: 1;
     overflow-y: auto;
@@ -203,17 +420,19 @@ body {
     display: flex;
     align-items: center;
     gap: 14px;
-    transition: background 0.15s;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.08s ease, background 0.15s ease;
 }
 .disc-card:active, .result-card:active {
+    transform: scale(0.98);
     background: var(--s2);
 }
 .disc-card.unread {
     border-color: var(--accent);
     border-width: 2px;
 }
+.disc-card.sent-read { border-right: 4px solid var(--accent); }
+.disc-card.sent-unread { border-right: 4px solid var(--text2); }
+.disc-card.received-read { border-right: 4px solid #34d399; }
 
 .avatar {
     width: 52px;
@@ -231,26 +450,9 @@ body {
     position: relative;
     overflow: hidden;
 }
-.avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-.dot {
-    position: absolute;
-    bottom: 2px;
-    right: 2px;
-    width: 12px;
-    height: 12px;
-    background: var(--online);
-    border-radius: 50%;
-    border: 2px solid var(--s1);
-}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-.disc-meta {
-    flex: 1;
-    min-width: 0;
-}
+.disc-meta { flex: 1; min-width: 0; }
 .disc-name {
     font-family: 'Syne', sans-serif;
     font-weight: 700;
@@ -263,9 +465,13 @@ body {
 .badge-new {
     background: var(--accent);
     color: white;
-    font-size: 0.6rem;
-    padding: 2px 8px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 10px;
     border-radius: 20px;
+    white-space: nowrap;
+    margin-left: auto;
+    flex-shrink: 0;
 }
 .disc-last {
     font-size: 0.8rem;
@@ -279,62 +485,16 @@ body {
     font-size: 0.65rem;
     color: var(--text2);
     flex-shrink: 0;
+    min-width: 50px;
+    text-align: right;
 }
 
-.result-name {
-    font-weight: 700;
-    font-size: 0.95rem;
-}
-.result-email {
-    font-size: 0.7rem;
-    color: var(--text2);
-}
-
-/* ===== VUE DISCUSSION ===== */
+/* ============================================
+   VUE DISCUSSION
+   ============================================ */
 #discView {
-    display: none;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
+    background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
 }
-#discView.active {
-    display: flex;
-}
-
-.chat-header {
-    background: var(--s1);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-shrink: 0;
-}
-.back-btn {
-    background: none;
-    border: none;
-    color: var(--accent);
-    font-size: 1.2rem;
-    cursor: pointer;
-    padding: 4px 8px 4px 0;
-}
-.chat-meta {
-    flex: 1;
-}
-.chat-name {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 1rem;
-}
-.chat-status {
-    font-size: 0.7rem;
-    color: var(--text2);
-    margin-top: 2px;
-}
-.chat-status.online {
-    color: var(--online);
-}
-
 .messages-area {
     flex: 1;
     overflow-y: auto;
@@ -342,54 +502,51 @@ body {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    background: transparent;
 }
-.input-area {
-    background: var(--s1);
-    border-top: 1px solid var(--border);
-    padding: 12px;
-    display: flex;
-    gap: 10px;
-    align-items: flex-end;
-    flex-shrink: 0;
-}
-.input-wrap {
+
+.chat-header .chat-meta {
     flex: 1;
-    background: var(--s2);
-    border: 1px solid var(--border);
-    border-radius: 28px;
-    padding: 10px 16px;
-}
-.input-wrap:focus-within {
-    border-color: var(--accent);
-}
-#msgInput {
-    width: 100%;
-    background: none;
-    border: none;
-    outline: none;
-    color: var(--text);
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.9rem;
-    resize: none;
-    max-height: 100px;
-    line-height: 1.4;
-}
-.send-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none;
-    color: white;
-    font-size: 1.1rem;
-    cursor: pointer;
-    flex-shrink: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 8px 16px;
+    margin: 0 8px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
-.send-btn:active {
-    transform: scale(0.95);
+.chat-header .chat-meta.online {
+    border-color: var(--online);
+    box-shadow: 0 0 4px rgba(52,211,153,0.3);
+}
+.chat-header .chat-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-align: center;
+}
+.chat-status {
+    font-size: 0.7rem;
+    color: var(--text2);
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Indicateur d'écriture – largeur fixe */
+.typing-indicator {
+    display: inline-block;
+    min-width: 70px;
+    text-align: left;
+    font-weight: bold;
+    color: var(--accent);
+    transition: opacity 0.2s ease;
 }
 
 /* Messages */
@@ -398,20 +555,16 @@ body {
     flex-direction: column;
     max-width: 80%;
 }
-.msg-row.sent {
-    align-self: flex-end;
-    align-items: flex-end;
-}
-.msg-row.recv {
-    align-self: flex-start;
-    align-items: flex-start;
-}
+.msg-row.sent { align-self: flex-end; align-items: flex-end; }
+.msg-row.recv { align-self: flex-start; align-items: flex-start; }
 .bubble {
-    padding: 10px 14px;
+    padding: 10px 16px;
     border-radius: 20px;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
+    font-weight: 500;
     line-height: 1.4;
     word-break: break-word;
+    transition: transform 0;
 }
 .sent .bubble {
     background: var(--sent);
@@ -435,13 +588,8 @@ body {
     justify-content: flex-end;
     margin-top: 2px;
 }
-.read-status {
-    font-size: 0.55rem;
-    color: var(--accent2);
-}
-.read-status.delivered {
-    color: var(--text2);
-}
+.read-status { font-size: 0.55rem; color: var(--accent2); }
+.read-status.delivered { color: var(--text2); }
 
 .date-sep {
     text-align: center;
@@ -459,35 +607,362 @@ body {
     background: var(--border);
 }
 
-/* ===== BOTTOM NAV ===== */
-.bottom-nav {
+/* Animation nouveaux messages (douce) */
+.msg-row.new-message {
+    animation: messageFadeIn 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+    opacity: 0;
+}
+.msg-row.sent.new-message {
+    animation: messageFadeInRight 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+}
+@keyframes messageFadeIn {
+    0% { opacity: 0; transform: translateX(-6px); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes messageFadeInRight {
+    0% { opacity: 0; transform: translateX(6px); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+.msg-row { animation: none; opacity: 1; transform: none; }
+
+/* Zone de saisie */
+.input-area {
     background: var(--s1);
     border-top: 1px solid var(--border);
-    padding: 10px 16px;
+    padding: 12px;
     display: flex;
     gap: 12px;
+    align-items: flex-end;
     flex-shrink: 0;
 }
-.nav-btn {
+.input-wrap {
+    flex: 1;
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    padding: 4px 16px;
+    transition: border-color 0.15s ease;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+}
+.input-wrap:focus-within { border-color: var(--accent); }
+#msgInput {
+    width: 100%;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    resize: none;
+    max-height: 120px;
+    line-height: 1.4;
+    padding: 12px 0;
+    margin: 0;
+}
+.send-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+.send-btn:active {
+    transform: scale(0.92);
+}
+
+/* ============================================
+   BARRE FOOTER
+   ============================================ */
+.footer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: var(--footer-bg);
+    border: 1px solid var(--footer-border);
+    border-radius: 30px;
+    min-height: 54px;
+    height: auto;
+    padding: 8px 16px;
+    margin: 0 12px 12px 12px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    flex-wrap: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+}
+.footer-left {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-shrink: 1;
+    min-width: 0;
+}
+.app-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    white-space: nowrap;
+}
+.version-badge {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text2);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.footer-center {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    padding: 4px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--clock-color);
+    text-align: center;
+    white-space: nowrap;
+    flex-shrink: 1;
+    min-width: 70px;
+}
+.footer-right {
+    background: var(--badge-bg);
+    border-radius: 30px;
+    padding: 4px 10px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: var(--badge-text);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Mode temporaire (message reçu) */
+.footer-bar.temp-mode {
+    border-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: footerPop 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+}
+@keyframes footerPop {
+    0% { transform: scale(0.96) translateY(4px); opacity: 0.8; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+.footer-bar.temp-mode .footer-left {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.footer-bar.temp-mode .temp-sender {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-weight: 800;
+    font-size: 0.85rem;
+    padding: 4px 12px;
+    border-radius: 30px;
+    margin-right: 6px;
+    white-space: nowrap;
+}
+.footer-bar.temp-mode .temp-message {
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: var(--temp-msg);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ============================================
+   VUE FIND USER
+   ============================================ */
+#findUserView {
+    background: var(--bg);
+}
+#findUserView .find-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+#findUserView .mode-toggles {
+    display: flex;
+    gap: 12px;
+    margin: 12px 16px 0 16px;
+}
+#findUserView .mode-btn {
     flex: 1;
     background: var(--s2);
     border: 1px solid var(--border);
     border-radius: 40px;
     padding: 12px;
-    color: var(--text2);
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 0.85rem;
+    font-weight: 600;
     cursor: pointer;
     text-align: center;
+    transition: background 0.15s ease, transform 0.1s ease;
+    color: var(--text2);
 }
-.nav-btn.active {
+#findUserView .mode-btn:active {
+    transform: scale(0.97);
+}
+#findUserView .mode-btn.active {
     background: var(--accent);
     border-color: var(--accent);
     color: white;
 }
+#findUserView .search-area {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+#findUserView .search-input {
+    flex: 1;
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 14px 18px;
+    color: var(--text);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+#findUserView .search-input:focus { border-color: var(--accent); }
+#findUserView .action-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 40px;
+    padding: 14px 24px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.1s ease, opacity 0.15s ease;
+}
+#findUserView .action-btn:active { transform: scale(0.96); }
+#findUserView .action-btn.loader {
+    background: var(--s2);
+    cursor: wait;
+}
+#findUserView .spinner-small {
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--text2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* ===== PARAMÈTRES ===== */
+#findUserView .result-item {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    animation: fadeSlideUp 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+#findUserView .result-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: white;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+}
+#findUserView .result-name { font-weight: 700; font-size: 1rem; }
+#findUserView .result-status { font-size: 0.7rem; margin-top: 4px; }
+#findUserView .status-online { color: #34d399; }
+#findUserView .status-offline { color: var(--text2); }
+#findUserView .chat-mini-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 30px;
+    padding: 8px 16px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: transform 0.1s ease;
+}
+#findUserView .chat-mini-btn:active { transform: scale(0.95); }
+#findUserView .profile-card {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    animation: fadeSlideUp 0.3s ease;
+}
+#findUserView .profile-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+}
+#findUserView .profile-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; }
+#findUserView .profile-email { font-size: 0.8rem; color: var(--text2); margin: 4px 0; }
+#findUserView .profile-status { font-size: 0.75rem; margin-top: 6px; }
+#findUserView .chat-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 40px;
+    padding: 10px 20px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+#findUserView .chat-btn:active { transform: scale(0.96); }
+#findUserView .error-message {
+    background: var(--s1);
+    border-left: 4px solid #f87171;
+    border-radius: 20px;
+    padding: 16px;
+    color: #f87171;
+    text-align: center;
+}
+
+/* ============================================
+   PARAMÈTRES
+   ============================================ */
 .settings-container {
     flex: 1;
     overflow-y: auto;
@@ -512,8 +987,6 @@ body {
     align-items: center;
     gap: 8px;
 }
-
-/* Profil */
 .profile-card {
     display: flex;
     align-items: center;
@@ -532,16 +1005,10 @@ body {
     color: white;
     cursor: pointer;
     overflow: hidden;
-    position: relative;
+    transition: transform 0.1s ease;
 }
-.profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-.profile-info {
-    flex: 1;
-}
+.profile-avatar:active { transform: scale(0.95); }
+.profile-info { flex: 1; }
 .profile-info input {
     width: 100%;
     background: var(--s2);
@@ -549,13 +1016,13 @@ body {
     border-radius: 40px;
     padding: 10px 14px;
     color: var(--text);
-    font-family: 'Nunito', sans-serif;
     font-size: 0.9rem;
     margin-bottom: 6px;
+    transition: border-color 0.15s ease;
 }
-.profile-info .email {
-    font-size: 0.75rem;
-    color: var(--text2);
+.profile-info input:focus {
+    outline: none;
+    border-color: var(--accent);
 }
 .save-btn {
     background: var(--accent);
@@ -566,36 +1033,48 @@ body {
     font-weight: 600;
     cursor: pointer;
     width: 100%;
+    transition: transform 0.1s ease;
 }
+.save-btn:active { transform: scale(0.97); }
 
-/* Thèmes */
+/* Thèmes – grille 5 colonnes */
 .theme-options {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+    width: 100%;
+    overflow-x: hidden;
 }
 .theme-card {
     background: var(--s2);
     border: 2px solid var(--border);
-    border-radius: 20px;
-    padding: 12px;
+    border-radius: 14px;
+    padding: 6px 4px;
     text-align: center;
     cursor: pointer;
-    transition: 0.2s;
+    transition: transform 0.1s ease, border-color 0.15s ease, background 0.15s ease;
+    min-width: 0;
 }
+.theme-card:active { transform: scale(0.96); }
 .theme-card.active {
     border-color: var(--accent);
     background: var(--s3);
 }
 .theme-preview {
     width: 100%;
-    height: 60px;
-    border-radius: 12px;
-    margin-bottom: 8px;
+    height: 45px;
+    border-radius: 10px;
+    margin-bottom: 4px;
+    aspect-ratio: 1 / 1;
 }
 .theme-name {
-    font-size: 0.75rem;
+    font-size: 0.6rem;
     font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Toggles */
@@ -606,22 +1085,10 @@ body {
     padding: 12px 0;
     border-bottom: 1px solid var(--border);
 }
-.toggle-item:last-child {
-    border-bottom: none;
-}
-.toggle-label {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-.toggle-title {
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-.toggle-desc {
-    font-size: 0.7rem;
-    color: var(--text2);
-}
+.toggle-item:last-child { border-bottom: none; }
+.toggle-label { display: flex; flex-direction: column; gap: 4px; }
+.toggle-title { font-weight: 600; font-size: 0.9rem; }
+.toggle-desc { font-size: 0.7rem; color: var(--text2); }
 .toggle-switch {
     width: 50px;
     height: 28px;
@@ -630,11 +1097,9 @@ body {
     border: 1px solid var(--border);
     cursor: pointer;
     position: relative;
-    transition: 0.2s;
+    transition: background 0.2s ease;
 }
-.toggle-switch.active {
-    background: var(--accent);
-}
+.toggle-switch.active { background: var(--accent); }
 .toggle-switch::after {
     content: '';
     position: absolute;
@@ -644,13 +1109,10 @@ body {
     border-radius: 50%;
     top: 1px;
     left: 2px;
-    transition: 0.2s;
+    transition: left 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
-.toggle-switch.active::after {
-    left: 24px;
-}
+.toggle-switch.active::after { left: 24px; }
 
-/* Déconnexion */
 .logout-btn {
     background: none;
     border: 1px solid var(--danger);
@@ -662,9 +1124,55 @@ body {
     cursor: pointer;
     width: 100%;
     margin-top: 8px;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+.logout-btn:active {
+    transform: scale(0.97);
+    background: rgba(248, 113, 113, 0.1);
 }
 
-/* ===== MODALS ===== */
+/* Sliders */
+.slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    outline: none;
+    margin: 12px 0;
+}
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.1s ease;
+}
+.slider::-webkit-slider-thumb:active { transform: scale(1.2); }
+.slider-item { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.slider-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+}
+.slider-value {
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--s2);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+}
+
+/* ============================================
+   MODALS
+   ============================================ */
 .modal {
     position: fixed;
     top: 0;
@@ -677,6 +1185,11 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 2000;
+    animation: fadeInModal 0.2s ease;
+}
+@keyframes fadeInModal {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 .modal-content {
     background: var(--s1);
@@ -686,20 +1199,17 @@ body {
     width: 85%;
     max-width: 280px;
     border: 1px solid var(--border);
+    animation: scaleInModal 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
-.modal-content p {
-    font-size: 1rem;
-    margin-bottom: 8px;
-}
-.modal-hint {
-    font-size: 0.7rem;
-    color: var(--text2);
-    margin-bottom: 20px;
+@keyframes scaleInModal {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }
 .modal-buttons {
     display: flex;
     gap: 12px;
     justify-content: center;
+    margin-top: 20px;
 }
 .btn-danger {
     background: var(--danger);
@@ -709,7 +1219,9 @@ body {
     color: white;
     font-weight: 600;
     cursor: pointer;
+    transition: transform 0.1s ease;
 }
+.btn-danger:active { transform: scale(0.96); }
 .btn-secondary {
     background: var(--s2);
     border: 1px solid var(--border);
@@ -718,1635 +1230,11 @@ body {
     color: var(--text);
     font-weight: 600;
     cursor: pointer;
+    transition: transform 0.1s ease;
 }
+.btn-secondary:active { transform: scale(0.96); }
 
-/* ===== EMPTY & LOADER ===== */
-.empty {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--text2);
-    font-size: 0.85rem;
-}
-.empty i {
-    font-size: 2rem;
-    display: block;
-    margin-bottom: 12px;
-    opacity: 0.4;
-}
-.loader-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 30px;
-    color: var(--text2);
-    font-size: 0.85rem;
-}
-.spin {
-    width: 16px;
-    height: 16px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-}
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 480px) {
-    .header, .header-settings {
-        padding: 10px 12px;
-        gap: 8px;
-    }
-    .logo {
-        font-size: 1.1rem;
-    }
-    .searchbar {
-        padding: 8px 12px;
-    }
-    .btn-settings {
-        padding: 6px 12px;
-        font-size: 0.75rem;
-    }
-    .disc-card, .result-card {
-        padding: 12px;
-        gap: 12px;
-    }
-    .avatar {
-        width: 48px;
-        height: 48px;
-        font-size: 1rem;
-    }
-    .disc-name {
-        font-size: 0.9rem;
-    }
-    .send-btn {
-        width: 44px;
-        height: 44px;
-    }
-    .nav-btn {
-        padding: 10px;
-        font-size: 0.8rem;
-    }
-    .theme-options {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 380px) {
-    .disc-name {
-        flex-wrap: wrap;
-    }
-    .msg-row {
-        max-width: 90%;
-    }
-    .profile-card {
-        flex-direction: column;
-        text-align: center;
-    }
-    .profile-info {
-        width: 100%;
-    }
-}
-
-/* Support safe areas */
-@supports (padding: max(0px)) {
-    body {
-        padding-top: env(safe-area-inset-top);
-        padding-bottom: env(safe-area-inset-bottom);
-    }
-    .header, .header-settings, .bottom-nav, .chat-header {
-        padding-left: max(16px, env(safe-area-inset-left));
-        padding-right: max(16px, env(safe-area-inset-right));
-    }
-    .input-area {
-        padding-bottom: max(12px, env(safe-area-inset-bottom));
-    }
-}
-.disc-card.sent-read {
-    border-right: 4px solid var(--accent);
-}
-.disc-card.sent-unread {
-    border-right: 4px solid var(--text2);
-}
-.disc-card.sent-read {
-    border-right: 4px solid var(--accent);
-}
-.disc-card.sent-unread {
-    border-right: 4px solid var(--text2);
-}
-.disc-card.received-read {
-    border-right: 4px solid #34d399;
-}
-/* ===== BARRE FOOTER ===== */
-.footer-bar {
-    position: relative;
-    width: calc(100% - 24px);
-    margin: 0 auto 12px auto;
-    height: 60px;
-    background: var(--footer-bg, var(--s1));
-    border: 1px solid var(--footer-border, var(--border));
-    border-radius: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-    cursor: pointer;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Partie gauche (LiveChat + version) */
-.footer-left {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    font-weight: 600;
-}
-
-.app-name {
-    color: var(--accent);
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 1rem;
-}
-
-.version {
-    font-size: 0.7rem;
-    color: var(--text2);
-    font-weight: normal;
-}
-
-/* Partie centrale (horloge) */
-.footer-center {
-    font-family: 'DM Mono', monospace;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--clock-color, var(--accent2));
-    letter-spacing: 1px;
-}
-
-/* Partie droite (badge notifications) */
-.footer-right {
-    background: var(--badge-bg, var(--s2));
-    border-radius: 30px;
-    padding: 6px 12px;
-    font-weight: 700;
-    color: var(--badge-text, var(--accent));
-    font-size: 0.85rem;
-    min-width: 36px;
-    text-align: center;
-}
-
-/* Mode temporaire (quand un message arrive) */
-.footer-bar.temp-mode {
-    border-color: var(--accent);
-    box-shadow: 0 0 12px var(--accent);
-    background: var(--footer-bg, var(--s1));
-}
-
-.temp-sender {
-    font-weight: 800;
-    color: var(--temp-sender, var(--accent));
-    font-size: 0.9rem;
-}
-
-.temp-message {
-    font-weight: 800;
-    color: var(--temp-msg, var(--text));
-    font-size: 0.9rem;
-}
-
-/* Variables spécifiques pour la barre selon les thèmes */
-body.theme-nuit {
-    --footer-bg: #0e1a26;
-    --footer-border: #2a3a4a;
-    --temp-sender: #3b8bff;
-    --temp-msg: #ffffff;
-    --badge-bg: #1e2a3a;
-    --badge-text: #3b8bff;
-    --clock-color: #5eead4;
-}
-
-body.theme-jour {
-    --footer-bg: #ffffff;
-    --footer-border: #cbd5e1;
-    --temp-sender: #3b8bff;
-    --temp-msg: #1e293b;
-    --badge-bg: #e2e8f0;
-    --badge-text: #3b8bff;
-    --clock-color: #2563eb;
-}
-
-body.theme-rose-bleu {
-    --footer-bg: #ffffff;
-    --footer-border: #f9a8d4;
-    --temp-sender: #db2777;
-    --temp-msg: #831843;
-    --badge-bg: #fce7f3;
-    --badge-text: #db2777;
-    --clock-color: #db2777;
-}
-
-body.theme-bleu-blanc {
-    --footer-bg: #ffffff;
-    --footer-border: #7dd3fc;
-    --temp-sender: #0284c7;
-    --temp-msg: #0f172a;
-    --badge-bg: #e0f2fe;
-    --badge-text: #0284c7;
-    --clock-color: #0284c7;
-}
-
-/* Responsive : barre plus petite sur mobiles */
-@media (max-width: 480px) {
-    .footer-bar {
-        height: 54px;
-        padding: 0 14px;
-        width: calc(100% - 16px);
-        margin-bottom: 8px;
-    }
-    .app-name {
-        font-size: 0.85rem;
-    }
-    .version {
-        font-size: 0.6rem;
-    }
-    .footer-center {
-        font-size: 0.85rem;
-    }
-    .footer-right {
-        padding: 4px 8px;
-        font-size: 0.75rem;
-        min-width: 30px;
-    }
-    .temp-sender, .temp-message {
-        font-size: 0.8rem;
-    }
-}
-
-/* Support safe areas (notch / caméra) */
-@supports (padding: max(0px)) {
-    .footer-bar {
-        margin-bottom: max(8px, env(safe-area-inset-bottom));
-    }
-}
-/* ===== BARRE FOOTER ===== */
-.footer-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--footer-bg);
-    border: 1px solid var(--footer-border);
-    border-radius: 30px;
-    height: 60px;
-    padding: 0 16px;
-    margin: 0 12px 12px 12px;
-    transition: all 0.2s;
-    cursor: pointer;
-}
-
-.footer-left {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-}
-
-.app-name {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.4rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.version-badge {
-    background: var(--s2);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 4px 10px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: var(--text2);
-}
-
-.footer-center {
-    background: var(--s2);
-    border: 1px solid var(--border);
-    border-radius: 30px;
-    padding: 6px 14px;
-    font-family: 'DM Mono', monospace;
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--clock-color);
-    letter-spacing: 1px;
-}
-
-.footer-right {
-    background: var(--badge-bg);
-    border-radius: 30px;
-    padding: 6px 12px;
-    font-weight: 700;
-    font-size: 0.8rem;
-    color: var(--badge-text);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-/* Mode temporaire (affichage message) */
-.footer-bar.temp-mode {
-    border-color: var(--accent);
-    box-shadow: 0 0 8px var(--accent);
-}
-
-.temp-sender {
-    font-weight: 800;
-    color: var(--temp-sender);
-    font-size: 0.9rem;
-}
-
-.temp-message {
-    font-weight: 800;
-    color: var(--temp-msg);
-    font-size: 0.9rem;
-}
-/* ===== BARRE FOOTER – MODE TEMPORAIRE ===== */
-.footer-bar.temp-mode .temp-sender {
-    display: inline-block;
-    background: var(--accent);
-    color: white;
-    font-weight: 800;
-    font-size: 1rem;
-    padding: 6px 14px;
-    border-radius: 30px;
-    margin-right: 8px;
-}
-
-.footer-bar.temp-mode .temp-message {
-    font-weight: 800;
-    font-size: 0.95rem;
-    color: var(--temp-msg);
-    display: inline;
-}
-/* ===== INTERDICTION DE SÉLECTION DE TEXTE ===== */
-* {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-/* Autoriser la sélection uniquement dans les champs de saisie (input / textarea) */
-input, textarea {
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    -ms-user-select: text;
-    user-select: text;
-}
-
-/* ===== STYLE DES SLIDERS (volume / vibration) ===== */
-.slider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 4px;
-    background: var(--border);
-    border-radius: 4px;
-    outline: none;
-    margin: 12px 0;
-}
-
-.slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    background: var(--accent);
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-    transition: 0.1s;
-}
-
-.slider::-webkit-slider-thumb:active {
-    transform: scale(1.2);
-}
-
-.slider::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    background: var(--accent);
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-}
-
-.slider-item {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 16px;
-}
-
-.slider-label {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.85rem;
-}
-
-.slider-title {
-    font-weight: 600;
-    color: var(--text);
-}
-
-.slider-value {
-    font-weight: 700;
-    color: var(--accent);
-    background: var(--s2);
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-}
-/* Supprimer le surlignement bleu/gris au clic sur la barre footer */
-.footer-bar {
-    -webkit-tap-highlight-color: transparent;
-    tap-highlight-color: transparent;
-    outline: none;
-    cursor: pointer;
-    user-select: none;
-}
-
-/* Désactiver également le surlignement sur tous les éléments cliquables */
-button,
-.disc-card,
-.result-card,
-.nav-btn,
-.toggle-switch,
-.back-btn,
-.send-btn,
-.logout-btn,
-.save-btn,
-.theme-card {
-    -webkit-tap-highlight-color: transparent;
-    outline: none;
-    user-select: none;
-}
-/* ===== CARTES DISCUSSION – BADGE FIXE À DROITE ===== */
-.disc-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 14px;
-    position: relative;
-}
-
-.disc-meta {
-    flex: 1;
-    min-width: 0;
-}
-
-.disc-name {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.badge-new {
-    background: var(--accent);
-    color: white;
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 2px 10px;
-    border-radius: 20px;
-    white-space: nowrap;
-    margin-left: auto;
-    flex-shrink: 0;
-}
-
-.disc-time {
-    font-size: 0.65rem;
-    color: var(--text2);
-    flex-shrink: 0;
-    min-width: 50px;
-    text-align: right;
-}
-
-/* ===== HEADER – MÊME FORME QUE FOOTER ===== */
-.header {
-    background: var(--s1);
-    border-bottom: 1px solid var(--border);
-    border-radius: 30px;
-    margin: 12px 12px 0 12px;
-    padding: 12px 18px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex-shrink: 0;
-}
-
-/* ===== BOUTONS LÉGÈREMENT PLUS GROS ===== */
-.btn-settings {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text2);
-    border-radius: 40px;
-    padding: 10px 18px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    font-weight: 600;
-    white-space: nowrap;
-    transition: 0.2s;
-}
-
-.btn-settings:hover {
-    background: var(--s2);
-    color: var(--accent);
-}
-
-.back-btn {
-    background: none;
-    border: none;
-    color: var(--accent);
-    font-size: 1.3rem;
-    cursor: pointer;
-    padding: 8px 12px 8px 0;
-}
-
-.send-btn {
-    width: 52px;
-    height: 52px;
-    font-size: 1.2rem;
-}
-
-/* ===== RECHERCHE ===== */
-.searchbar {
-    flex: 1;
-    background: var(--s2);
-    border: 1px solid var(--border);
-    border-radius: 40px;
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.searchbar input {
-    font-size: 0.95rem;
-}
-
-/* ===== BOUTONS DE NAVIGATION (bottom-nav) – SI CONSERVÉS ===== */
-.nav-btn {
-    padding: 14px;
-    font-size: 0.9rem;
-}
-/* ===== HEADER DE LA VUE DISCUSSION (mm forme que chatView) ===== */
-.chat-header {
-    background: var(--s1);
-    border-bottom: 1px solid var(--border);
-    border-radius: 30px;
-    margin: 12px 12px 0 12px;
-    padding: 12px 18px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex-shrink: 0;
-}
-
-/* Ajustement du bouton retour pour qu’il s’intègre bien */
-.chat-header .back-btn {
-    background: none;
-    border: none;
-    color: var(--accent);
-    font-size: 1.3rem;
-    cursor: pointer;
-    padding: 8px 12px 8px 0;
-}
-
-/* Avatar dans le header discussion (optionnel, pour rester cohérent) */
-.chat-header .avatar {
-    width: 44px;
-    height: 44px;
-    font-size: 1rem;
-}
-/* ===== HEADER DISCUSSION – INFOS DANS UN RECTANGLE CENTRÉ ===== */
-.chat-header .chat-meta {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: var(--s2);
-    border: 1px solid var(--border);
-    border-radius: 40px;
-    padding: 8px 16px;
-    margin: 0 8px;
-}
-
-.chat-header .chat-name {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 0.95rem;
-    text-align: center;
-}
-
-.chat-header .chat-status {
-    font-size: 0.65rem;
-    color: var(--text2);
-    text-align: center;
-}
-
-.chat-header .chat-status.online {
-    color: var(--online);
-}
-/* ===== INDICATEUR D'ÉCRITURE – À CÔTÉ DU NOM ===== */
-.chat-status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.typing-indicator {
-    font-size: 0.65rem;
-    font-style: italic;
-    color: var(--accent2);
-    margin-left: 0;
-    display: inline;
-}
-/* ===== RECTANGLE DES INFOS (discussion) – BORDURE VERTE SI EN LIGNE ===== */
-.chat-header .chat-meta {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: var(--s2);
-    border: 1px solid var(--border);
-    border-radius: 40px;
-    padding: 8px 16px;
-    margin: 0 8px;
-    transition: border-color 0.2s ease;
-}
-
-/* Quand l'utilisateur est en ligne → bordure verte */
-.chat-header .chat-meta.online {
-    border-color: var(--online);
-    box-shadow: 0 0 4px rgba(52, 211, 153, 0.3);
-}
-/* ===== BULLES DE DISCUSSION – TAILLE AGRANDIE + TEXTE GRAS ===== */
-.bubble {
-    padding: 14px 20px;
-    font-size: 1.05rem;
-    font-weight: 700;
-    line-height: 1.5;
-    border-radius: 24px;
-}
-
-.msg-time {
-    font-size: 0.7rem;
-    font-weight: normal;
-    margin-top: 4px;
-}
-
-/* Ajustement du conteneur des messages pour éviter le débordement */
-.msg-row {
-    max-width: 85%;
-}
-
-/* Version encore plus large sur petits écrans */
-@media (max-width: 480px) {
-    .bubble {
-        padding: 12px 16px;
-        font-size: 0.95rem;
-    }
-    .msg-row {
-        max-width: 90%;
-    }
-}
-/* ===== CHAMP DE SAISIE – MÊME FORME QUE HEADER ===== */
-.input-area {
-    background: var(--s1);
-    border-top: 1px solid var(--border);
-    padding: 12px;
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-    flex-shrink: 0;
-}
-
-.input-wrap {
-    flex: 1;
-    background: var(--s2);
-    border: 1px solid var(--border);
-    border-radius: 30px;
-    padding: 4px 16px;
-    transition: border-color 0.2s;
-    min-height: 50px;
-    display: flex;
-    align-items: center;
-}
-
-.input-wrap:focus-within {
-    border-color: var(--accent);
-}
-
-#msgInput {
-    width: 100%;
-    background: none;
-    border: none;
-    outline: none;
-    color: var(--text);
-    font-family: 'Nunito', sans-serif;
-    font-size: 1rem;
-    resize: none;
-    max-height: 120px;
-    line-height: 1.4;
-    padding: 12px 0;
-    margin: 0;
-}
-
-/* Conservation du clavier après envoi (pas de blur automatique) */
-.send-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none;
-    color: white;
-    font-size: 1.1rem;
-    cursor: pointer;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: 0.15s;
-}
-
-.send-btn:active {
-    transform: scale(0.95);
-}
-/* ===== FOND DÉGRADÉ POUR LA VUE DISCUSSION ===== */
-#discView {
-    background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
-}
-
-/* Masquer le dégradé derrière les bulles (optionnel, garde la lisibilité) */
-.messages-area {
-    background: transparent;
-}
-
-/* Thème Nuit */
-body.theme-nuit {
-    --grad-start: #0a0f1a;
-    --grad-end: #0e1a26;
-}
-
-/* Thème Jour */
-body.theme-jour {
-    --grad-start: #eef2ff;
-    --grad-end: #f8fafc;
-}
-
-/* Thème Rose-Bleu */
-body.theme-rose-bleu {
-    --grad-start: #fdf2f8;
-    --grad-end: #fce7f3;
-}
-
-/* Thème Bleu-Blanc */
-body.theme-bleu-blanc {
-    --grad-start: #f0f9ff;
-    --grad-end: #e0f2fe;
-}
-/* ===== ANIMATION 3D POUR LA BARRE FOOTER (mode temporaire) ===== */
-.footer-bar {
-    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1), box-shadow 0.3s ease;
-    transform-style: preserve-3d;
-    perspective: 800px;
-}
-
-.footer-bar.temp-mode {
-    animation: footerPop 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-}
-
-@keyframes footerPop {
-    0% {
-        transform: scale(0.95) translateY(10px) rotateX(-5deg);
-        opacity: 0.7;
-    }
-    40% {
-        transform: scale(1.02) translateY(-2px) rotateX(2deg);
-    }
-    100% {
-        transform: scale(1) translateY(0) rotateX(0);
-        opacity: 1;
-    }
-}
-/* ===== ANIMATION UNIQUEMENT POUR LES NOUVEAUX MESSAGES ===== */
-.msg-row.new-message {
-    animation: messageFadeIn 0.3s ease-out forwards;
-    opacity: 0;
-}
-
-.msg-row.sent.new-message {
-    animation: messageFadeInRight 0.3s ease-out forwards;
-}
-
-@keyframes messageFadeIn {
-    0% {
-        opacity: 0;
-        transform: translateX(-10px) scale(0.95);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-}
-
-@keyframes messageFadeInRight {
-    0% {
-        opacity: 0;
-        transform: translateX(10px) scale(0.95);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0) scale(1);
-    }
-}
-
-/* Les anciens messages n'ont pas d'animation */
-.msg-row {
-    animation: none;
-    opacity: 1;
-    transform: none;
-}
-/* ===== TRANSITION DOUCE ENTRE LES VUES ===== */
-.view {
-    animation: fadeIn 0.25s ease-out forwards;
-}
-
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Éviter l'animation au chargement initial de la première vue */
-.view.active {
-    animation: none;
-}
-
-/* Pour la vue discussion, une légère variation (glissement latéral) */
-#discView.active {
-    animation: slideInRight 0.25s ease-out forwards;
-}
-
-@keyframes slideInRight {
-    0% {
-        opacity: 0;
-        transform: translateX(15px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-/* Pour les paramètres, glissement depuis le bas */
-#settingsView.active {
-    animation: slideInUp 0.25s ease-out forwards;
-}
-
-@keyframes slideInUp {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-/* ===== TRANSITIONS ENTRE LES VUES (aller ET retour) ===== */
-.view {
-    animation-duration: 0.25s;
-    animation-fill-mode: forwards;
-}
-
-/* Vue qui s'affiche (entrante) */
-.view.active {
-    animation-name: fadeIn;
-}
-
-/* Vue qui se cache (sortante) – on utilise une classe temporaire */
-.view.exit {
-    animation-name: fadeOut;
-    display: flex !important; /* pour que l'animation soit visible */
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: inherit;
-}
-
-/* Animations d'entrée */
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes slideInRight {
-    0% {
-        opacity: 0;
-        transform: translateX(15px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes slideInUp {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes slideOutLeft {
-    0% {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateX(-15px);
-    }
-}
-
-@keyframes slideOutDown {
-    0% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-}
-
-@keyframes fadeOut {
-    0% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-}
-
-/* Animations spécifiques selon la vue */
-#discView.active {
-    animation-name: slideInRight;
-}
-
-#settingsView.active {
-    animation-name: slideInUp;
-}
-
-/* Animation de sortie pour discView */
-#discView.exit {
-    animation-name: slideOutLeft;
-}
-
-/* Animation de sortie pour settingsView */
-#settingsView.exit {
-    animation-name: slideOutDown;
-}
-/* ===== BARRE FOOTER – RÉTRACTIBLE & ÉLÉMENTS CONTENUS ===== */
-.footer-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    background: var(--footer-bg);
-    border: 1px solid var(--footer-border);
-    border-radius: 30px;
-    min-height: 54px;
-    height: auto;
-    padding: 8px 16px;
-    margin: 0 12px 12px 12px;
-    transition: all 0.2s ease;
-    flex-wrap: nowrap;
-    overflow: hidden;
-}
-
-/* Groupe gauche (LiveChat + version) */
-.footer-left {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    flex-shrink: 1;
-    min-width: 0;
-}
-
-.app-name {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    white-space: nowrap;
-}
-
-.version-badge {
-    background: var(--s2);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 2px 8px;
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: var(--text2);
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-
-/* Horloge (centre) */
-.footer-center {
-    background: var(--s2);
-    border: 1px solid var(--border);
-    border-radius: 30px;
-    padding: 4px 12px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--clock-color);
-    text-align: center;
-    white-space: nowrap;
-    flex-shrink: 1;
-    min-width: 70px;
-}
-
-/* Badge (droite) */
-.footer-right {
-    background: var(--badge-bg);
-    border-radius: 30px;
-    padding: 4px 10px;
-    font-weight: 700;
-    font-size: 0.75rem;
-    color: var(--badge-text);
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-
-/* Mode temporaire (nom + message) */
-.footer-bar.temp-mode .footer-left {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.footer-bar.temp-mode .temp-sender {
-    display: inline-block;
-    background: var(--accent);
-    color: white;
-    font-weight: 800;
-    font-size: 0.85rem;
-    padding: 4px 12px;
-    border-radius: 30px;
-    margin-right: 6px;
-    white-space: nowrap;
-}
-
-.footer-bar.temp-mode .temp-message {
-    font-weight: 800;
-    font-size: 0.85rem;
-    color: var(--temp-msg);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-/* RESPONSIVE : rétrécissement sur petits écrans */
-@media (max-width: 480px) {
-    .footer-bar {
-        padding: 6px 12px;
-        margin: 0 8px 8px 8px;
-        gap: 6px;
-    }
-    .app-name {
-        font-size: 1rem;
-    }
-    .version-badge {
-        font-size: 0.55rem;
-        padding: 2px 6px;
-    }
-    .footer-center {
-        font-size: 0.75rem;
-        padding: 3px 8px;
-        min-width: 60px;
-    }
-    .footer-right {
-        font-size: 0.65rem;
-        padding: 3px 8px;
-    }
-    .footer-bar.temp-mode .temp-sender,
-    .footer-bar.temp-mode .temp-message {
-        font-size: 0.75rem;
-    }
-}
-
-@media (max-width: 380px) {
-    .footer-bar {
-        padding: 4px 10px;
-        gap: 4px;
-    }
-    .app-name {
-        font-size: 0.85rem;
-    }
-    .version-badge {
-        display: none; /* cache la version sur très petits écrans */
-    }
-    .footer-center {
-        font-size: 0.7rem;
-        min-width: 50px;
-    }
-}
-/* ===== BOUTON PLUS DANS LE HEADER ===== */
-.plus-btn-header {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border: none;
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.15s ease, box-shadow 0.2s ease;
-    flex-shrink: 0;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.plus-btn-header:active {
-    transform: scale(0.92);
-}
-
-/* ===== VUE FIND USER ===== */
-#findUserView {
-    background: var(--bg);
-}
-
-#findUserView .find-container {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-/* Toggles de mode */
-#findUserView .mode-toggles {
-    display: flex;
-    gap: 12px;
-    margin: 12px 16px 0 16px;
-}
-
-#findUserView .mode-btn {
-    flex: 1;
-    background: var(--s2);
-    border: 1px solid var(--border);
-    border-radius: 40px;
-    padding: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    text-align: center;
-    transition: 0.2s;
-    color: var(--text2);
-}
-
-#findUserView .mode-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: white;
-}
-
-/* Zone de recherche */
-#findUserView .search-area {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-}
-
-#findUserView .search-input {
-    flex: 1;
-    background: var(--s2);
-    border: 1px solid var(--border);
-    border-radius: 40px;
-    padding: 14px 18px;
-    color: var(--text);
-    font-size: 1rem;
-    outline: none;
-}
-
-#findUserView .search-input:focus {
-    border-color: var(--accent);
-}
-
-#findUserView .action-btn {
-    background: var(--accent);
-    border: none;
-    border-radius: 40px;
-    padding: 14px 24px;
-    color: white;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: 0.2s;
-}
-
-#findUserView .action-btn:active {
-    transform: scale(0.96);
-}
-
-#findUserView .action-btn.loader {
-    background: var(--s2);
-    cursor: wait;
-}
-
-/* Loader spinner */
-#findUserView .spinner-small {
-    width: 18px;
-    height: 18px;
-    border: 2px solid var(--text2);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-/* Liste des résultats */
-#findUserView .results-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-#findUserView .result-item {
-    background: var(--s1);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 14px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    animation: fadeSlideUp 0.2s ease;
-}
-
-@keyframes fadeSlideUp {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-#findUserView .result-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    color: white;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-}
-
-#findUserView .result-info {
-    flex: 1;
-}
-
-#findUserView .result-name {
-    font-weight: 700;
-    font-size: 1rem;
-}
-
-#findUserView .result-status {
-    font-size: 0.7rem;
-    margin-top: 4px;
-}
-
-#findUserView .status-online {
-    color: #34d399;
-}
-
-#findUserView .status-offline {
-    color: var(--text2);
-}
-
-#findUserView .chat-mini-btn {
-    background: var(--accent);
-    border: none;
-    border-radius: 30px;
-    padding: 8px 16px;
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 0.8rem;
-    transition: 0.15s;
-}
-
-#findUserView .chat-mini-btn:active {
-    transform: scale(0.95);
-}
-
-/* Profil unique (mode email) */
-#findUserView .profile-card {
-    background: var(--s1);
-    border: 1px solid var(--border);
-    border-radius: 28px;
-    padding: 24px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    animation: fadeSlideUp 0.3s ease;
-}
-
-#findUserView .profile-avatar {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    color: white;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-}
-
-#findUserView .profile-info {
-    flex: 1;
-}
-
-#findUserView .profile-name {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 1.1rem;
-}
-
-#findUserView .profile-email {
-    font-size: 0.8rem;
-    color: var(--text2);
-    margin: 4px 0;
-}
-
-#findUserView .profile-status {
-    font-size: 0.75rem;
-    margin-top: 6px;
-}
-
-#findUserView .chat-btn {
-    background: var(--accent);
-    border: none;
-    border-radius: 40px;
-    padding: 10px 20px;
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.15s;
-}
-
-#findUserView .chat-btn:active {
-    transform: scale(0.96);
-}
-
-/* Message d'erreur */
-#findUserView .error-message {
-    background: var(--s1);
-    border-left: 4px solid #f87171;
-    border-radius: 20px;
-    padding: 16px;
-    color: #f87171;
-    text-align: center;
-}
-
-/* Footer spécifique à findUserView */
-#findUserView .find-footer {
-    margin-top: auto;
-}
-
-#findUserView .find-footer .footer-center {
-    font-family: 'DM Mono', monospace;
-    background: var(--s2);
-    padding: 4px 12px;
-    border-radius: 30px;
-    font-size: 0.8rem;
-}
-/* ===== ANIMATIONS DE TRANSITION ENTRE LES VUES ===== */
-.view {
-    animation-duration: 0.25s;
-    animation-fill-mode: forwards;
-    animation-timing-function: ease-out;
-}
-
-/* Vue qui s'affiche (entrante) */
-.view.active {
-    animation-name: fadeIn;
-}
-
-/* Vue qui se cache (sortante) */
-.view.exit {
-    animation-name: fadeOut;
-    display: flex !important;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: inherit;
-    z-index: 10;
-}
-
-/* Animations d'entrée */
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes slideInRight {
-    0% {
-        opacity: 0;
-        transform: translateX(15px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes slideInUp {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Animations de sortie */
-@keyframes fadeOut {
-    0% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-}
-
-@keyframes slideOutLeft {
-    0% {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateX(-15px);
-    }
-}
-
-@keyframes slideOutDown {
-    0% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-}
-
-/* Animations spécifiques pour chaque vue (entrée) */
-#discView.active {
-    animation-name: slideInRight;
-}
-
-#settingsView.active {
-    animation-name: slideInUp;
-}
-
-#findUserView.active {
-    animation-name: slideInUp;
-}
-
-/* Animations spécifiques pour chaque vue (sortie) */
-#discView.exit {
-    animation-name: slideOutLeft;
-}
-
-#settingsView.exit {
-    animation-name: slideOutDown;
-}
-
-#findUserView.exit {
-    animation-name: slideOutDown;
-}
-/* ===== TRANSITIONS SIMPLES ENTRE LES VUES (FADE UNIQUEMENT) ===== */
-.view {
-    transition: opacity 0.2s ease, visibility 0.2s ease;
-    opacity: 1;
-    visibility: visible;
-}
-
-.view.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-/* Vue qui se cache (sortante) */
-.view.exit {
-    opacity: 0;
-    visibility: hidden;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: inherit;
-    z-index: 10;
-}
-
-/* Pas d’animation spéciale par vue */
-#discView.active,
-#settingsView.active,
-#findUserView.active {
-    animation: none;
-}
-/* Masquer complètement l'application quand l'utilisateur n'est pas connecté */
-.app {
-    transition: opacity 0.2s ease;
-}
-.app.hide {
-    display: none;
-}
-
-/* Écran de connexion pleine page */
+/* Écran de connexion */
 .login-overlay {
     position: fixed;
     top: 0;
@@ -2360,27 +1248,10 @@ body.theme-bleu-blanc {
     justify-content: center;
     text-align: center;
     z-index: 10000;
-    backdrop-filter: blur(0px);
+    animation: fadeIn 0.3s ease;
 }
-
-.login-overlay i {
-    font-size: 4rem;
-    color: #3b8bff;
-    margin-bottom: 20px;
-}
-
-.login-overlay h2 {
-    margin-bottom: 10px;
-    color: #eef2ff;
-}
-
-.login-overlay p {
-    margin-bottom: 30px;
-    color: #7a90a8;
-}
-
 .login-overlay button {
-    background: #3b8bff;
+    background: var(--accent);
     color: white;
     border: none;
     padding: 14px 28px;
@@ -2388,123 +1259,387 @@ body.theme-bleu-blanc {
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    font-family: 'Nunito', sans-serif;
+    transition: transform 0.1s ease;
+}
+.login-overlay button:active { transform: scale(0.96); }
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 480px) {
+    .header, .header-settings, .chat-header { padding: 10px 12px; gap: 8px; }
+    .searchbar { padding: 8px 12px; }
+    .btn-settings { padding: 6px 12px; font-size: 0.75rem; }
+    .disc-card, .result-card { padding: 12px; gap: 12px; }
+    .avatar { width: 48px; height: 48px; font-size: 1rem; }
+    .disc-name { font-size: 0.9rem; }
+    .send-btn { width: 44px; height: 44px; font-size: 1rem; }
+    .theme-options { grid-template-columns: repeat(3, 1fr); }
+    .bubble { padding: 8px 12px; font-size: 0.9rem; }
+    .msg-row { max-width: 90%; }
+    .footer-bar { padding: 6px 12px; margin: 0 8px 8px 8px; gap: 6px; }
+    .app-name { font-size: 1rem; }
+    .footer-center { font-size: 0.75rem; padding: 3px 8px; min-width: 60px; }
+}
+@media (max-width: 380px) {
+    .profile-card { flex-direction: column; text-align: center; }
+    .profile-info { width: 100%; }
+    .theme-options { grid-template-columns: repeat(2, 1fr); }
+    .version-badge { display: none; }
+    .footer-center { font-size: 0.7rem; min-width: 50px; }
+}
+
+/* Safe areas */
+@supports (padding: max(0px)) {
+    body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    .header, .header-settings, .chat-header {
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+    }
+    .footer-bar { margin-bottom: max(8px, env(safe-area-inset-bottom)); }
+    .input-area { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
 }
 /* ============================================
-   BULLE DE RÉPONSE (MESSAGE AVEC CITATION)
+   LOADER SPÉCIFIQUE À LA VUE DISCUSSION
+   ============================================ */
+#discView .loader-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px 20px;
+    color: var(--text2);
+    font-size: 0.85rem;
+    background: transparent;
+    animation: discLoaderPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes discLoaderPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+#discView .spin {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: discSpin 0.8s linear infinite;
+}
+
+@keyframes discSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* Message de chargement stylisé */
+#discView .loader-row::before {
+    content: "...";
+    font-size: 2rem;
+    opacity: 0.6;
+    animation: discBounce 1s ease-in-out infinite;
+}
+
+@keyframes discBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+#discView .loader-row span {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+/* ============================================
+   ÉTAT VIDE D'UNE DISCUSSION
+   ============================================ */
+#discView .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text2);
+    font-size: 0.9rem;
+    background: transparent;
+    animation: emptyFadeIn 0.4s ease-out;
+}
+
+@keyframes emptyFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#discView .empty i {
+    font-size: 3.5rem;
+    margin-bottom: 16px;
+    color: var(--accent);
+    opacity: 0.5;
+    animation: emptyIconPulse 2s ease-in-out infinite;
+}
+
+@keyframes emptyIconPulse {
+    0%, 100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+}
+
+#discView .empty::after {
+    content: "Soyez le premier à envoyer un message ✨";
+    display: block;
+    margin-top: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--accent2);
+    letter-spacing: 0.3px;
+}
+/* ============================================
+   CLIC RAPIDE – OUVERTURE INSTANTANÉE
    ============================================ */
 
-/* Conteneur principal du message réponse */
-.reply-bubble {
-    padding: 12px 14px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    line-height: 1.4;
-    word-break: break-word;
-    background: inherit;
+/* Désactiver toute transition sur l’ouverture des cartes */
+.disc-card {
+    transition: none;
 }
 
-/* Version envoyée (moi) */
-.sent .reply-bubble {
+.disc-card:active {
+    transform: none;
+    background: var(--s2);
+}
+
+/* Supprimer tout délai d’animation sur les cartes */
+.disc-card,
+.result-card {
+    animation: none !important;
+    transition: background 0.05s ease;
+}
+
+/* Assurer que le clic est immédiat */
+.disc-card,
+.result-card,
+.plus-btn-header,
+.send-btn,
+.back-btn,
+.nav-btn {
+    touch-action: manipulation;
+}
+/* ============================================
+   PULSION LUMINEUSE AU CLIC (TYPE WHATSAPP)
+   ============================================ */
+
+.disc-card {
+    position: relative;
+    overflow: hidden;
+    transition: background 0.08s ease;
+    touch-action: manipulation;
+}
+
+.disc-card:active {
+    background: var(--s2);
+}
+
+/* Effet de pulsation ripple */
+.disc-card::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(90, 158, 255, 0.4);
+    transform: translate(-50%, -50%);
+    transition: width 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1), height 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    pointer-events: none;
+}
+
+.disc-card:active::after {
+    width: 200%;
+    height: 200%;
+    background: rgba(90, 158, 255, 0.1);
+}
+/* ============================================
+   BULLES DE DISCUSSION AGRANDIES
+   ============================================ */
+
+#discView .bubble {
+    padding: 14px 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.45;
+    border-radius: 24px;
+    max-width: 100%;
+}
+
+#discView .sent .bubble {
+    border-bottom-right-radius: 6px;
     background: var(--sent);
     color: white;
-    border-bottom-right-radius: 4px;
 }
 
-/* Version reçue (l'autre) */
-.recv .reply-bubble {
+#discView .recv .bubble {
+    border-bottom-left-radius: 6px;
     background: var(--s2);
     border: 1px solid var(--border);
-    border-bottom-left-radius: 4px;
     color: var(--text);
 }
 
-/* En-tête de la citation */
-.reply-quoted-header {
-    display: flex;
-    align-items: center;
+/* Ajustement de l’espacement entre les messages */
+#discView .msg-row {
+    margin-bottom: 4px;
+}
+
+/* Texte plus lisible */
+#discView .message-footer {
+    margin-top: 3px;
     gap: 6px;
+}
+
+/* Ajustement responsive pour petits écrans */
+@media (max-width: 480px) {
+    #discView .bubble {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+}
+/* ============================================
+   TRANSITION FLUIDE ENTRE LES VUES (0.5s)
+   ============================================ */
+.view {
+    transition: opacity 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1), visibility 0.5s;
+    opacity: 1;
+    visibility: visible;
+}
+
+.view.exit {
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: inherit;
+    z-index: 10;
+}
+/* ============================================
+   VUE INFO USER (PROFIL UTILISATEUR)
+   ============================================ */
+.userinfo-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    overflow-y: auto;
+}
+
+.userinfo-card {
+    background: var(--s1);
+    border: 1px solid var(--border);
+    border-radius: 32px;
+    padding: 32px 24px;
+    text-align: center;
+    width: 100%;
+    max-width: 350px;
+    animation: fadeInUp 0.3s ease-out;
+}
+
+.userinfo-avatar {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 50%;
+    display: flex;
+align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: bold;
+    color: white;
+    overflow: hidden;
+}
+
+.userinfo-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.userinfo-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    color: var(--text);
     margin-bottom: 8px;
-    font-size: 0.7rem;
-    opacity: 0.8;
 }
 
-.reply-icon {
-    font-size: 0.7rem;
+.userinfo-email {
+    font-size: 0.85rem;
+    color: var(--text2);
+    margin-bottom: 12px;
+    word-break: break-all;
 }
 
-.reply-quoted-label {
+.userinfo-status {
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+    padding: 6px 12px;
+    border-radius: 40px;
+    display: inline-block;
+}
+
+.userinfo-status.online {
+    background: rgba(52, 211, 153, 0.15);
+    color: #34d399;
+}
+
+.userinfo-status.offline {
+    background: rgba(248, 113, 113, 0.15);
+    color: #f87171;
+}
+
+.userinfo-chat-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 40px;
+    padding: 12px 24px;
+    color: white;
     font-weight: 600;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
+    font-size: 1rem;
+    cursor: pointer;
+    width: 100%;
+    transition: transform 0.1s ease, background 0.2s ease;
 }
 
-/* Message cité (celui auquel on répond) */
-.reply-quoted-text {
-    font-style: italic;
-    font-size: 0.8rem;
-    padding: 6px 10px;
-    background: rgba(0, 0, 0, 0.08);
-    border-radius: 12px;
-    margin-bottom: 8px;
-    word-break: break-word;
-    border-left: 3px solid var(--accent);
-}
-
-/* Version envoyée pour le message cité */
-.sent .reply-quoted-text {
-    background: rgba(255, 255, 255, 0.15);
-    border-left-color: rgba(255, 255, 255, 0.5);
-}
-
-/* Version reçue pour le message cité */
-.recv .reply-quoted-text {
-    background: rgba(0, 0, 0, 0.05);
-    border-left-color: var(--accent);
-}
-
-/* Séparateur entre citation et nouvelle réponse */
-.reply-divider {
-    height: 1px;
-    background: rgba(255, 255, 255, 0.2);
-    margin: 8px 0;
-}
-
-.recv .reply-divider {
-    background: var(--border);
-}
-
-/* Nouveau message (la réponse) */
-.reply-new-message {
-    font-weight: 600;
-    font-size: 0.95rem;
-    margin-top: 4px;
-}
-
-/* Image dans une réponse */
-.reply-new-message .msg-image {
-    margin-bottom: 6px;
-}
-
-.reply-new-message .msg-image img {
-    max-width: 180px;
-    max-height: 180px;
+.userinfo-chat-btn:active {
+    transform: scale(0.97);
 }
 
 /* ============================================
-   MESSAGE AVEC IMAGE SEULE (sans texte)
+   RÉPONSE PAR GLISSEMENT (SWIPE)
    ============================================ */
-.bubble .msg-image {
-    margin-bottom: 0;
+.msg-row {
+    transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1), opacity 0.2s ease;
+    cursor: pointer;
+    touch-action: pan-y pinch-zoom;
 }
 
-.bubble .msg-image img {
-    display: block;
-}
-
-/* ============================================
-   BARRE DE RÉPONSE (quote bar dans input)
-   ============================================ */
 .reply-quote-bar {
     display: flex;
     align-items: center;
@@ -2554,9 +1689,6 @@ body.theme-bleu-blanc {
     background: rgba(0, 0, 0, 0.1);
 }
 
-/* ============================================
-   ANIMATIONS
-   ============================================ */
 @keyframes slideDown {
     from {
         opacity: 0;
@@ -2569,238 +1701,373 @@ body.theme-bleu-blanc {
 }
 
 /* ============================================
-   AFFICHAGE DES IMAGES DANS LES MESSAGES
+   AVATAR SELECTOR MODAL
    ============================================ */
-.msg-image {
-    margin-bottom: 6px;
-}
-
-.msg-image img {
-    max-width: 200px;
-    max-height: 200px;
-    border-radius: 16px;
-    object-fit: cover;
+.avatar-option {
     cursor: pointer;
-    transition: transform 0.1s ease, opacity 0.2s ease;
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
 }
 
-.msg-image img:active {
-    transform: scale(0.98);
-    opacity: 0.9;
+.avatar-option:active {
+    transform: scale(0.95);
+}
+
+.avatar-option:hover {
+    box-shadow: 0 0 0 3px var(--accent);
 }
 
 /* ============================================
-   MODAL ZOOM IMAGE
+   AMÉLIORATION CLICK AVATAR
    ============================================ */
-.image-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.95);
-    z-index: 10000;
+.avatar {
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+.avatar:active {
+    transform: scale(0.95);
+}
+
+.profile-avatar {
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+.profile-avatar:active {
+    transform: scale(0.95);
+}
+
+.result-avatar {
+    cursor: pointer;
+    transition: transform 0.1s ease;
+}
+
+.result-avatar:active {
+    transform: scale(0.95);
+}
+
+.result-info {
+    cursor: pointer;
+}
+
+.profile-avatar[style*="cursor:pointer"]:active,
+.profile-info[style*="cursor:pointer"]:active {
+    opacity: 0.7;
+}
+
+/* ============================================
+   BANDEAUX D'INFORMATION
+   ============================================ */
+.showBanner {
+    background: var(--s1);
+    border-left: 4px solid var(--accent);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin: 12px;
+    animation: fadeIn 0.3s ease;
+    color: var(--text);
+}
+
+.showBanner.success {
+    border-left-color: #34d399;
+    background: rgba(52, 211, 153, 0.1);
+}
+
+.showBanner.error {
+    border-left-color: #f87171;
+    background: rgba(248, 113, 113, 0.1);
+}
+
+.showBanner.info {
+    border-left-color: var(--accent);
+    background: rgba(59, 139, 255, 0.1);
+}
+/* ============================================
+   BULLE DE RÉPONSE (MESSAGE CITÉ)
+   ============================================ */
+.reply-bubble {
+    padding: 10px 14px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.sent .reply-bubble {
+    background: var(--sent);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.recv .reply-bubble {
+    background: var(--s2);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+    color: var(--text);
+}
+
+.reply-quoted-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    animation: fadeInModal 0.2s ease-out;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 0.7rem;
+    opacity: 0.7;
 }
 
-.image-modal img {
-    max-width: 90%;
-    max-height: 90%;
-    object-fit: contain;
-    border-radius: 8px;
-    animation: zoomIn 0.2s ease-out;
+.reply-icon {
+    font-size: 0.7rem;
 }
 
-@keyframes fadeInModal {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.reply-quoted-label {
+    font-weight: 600;
+    letter-spacing: 0.3px;
 }
 
-@keyframes zoomIn {
-    from {
-        transform: scale(0.9);
-        opacity: 0;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
+.reply-quoted-text {
+    font-style: italic;
+    font-size: 0.8rem;
+    padding: 6px 8px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    word-break: break-word;
+}
+
+.sent .reply-quoted-text {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.reply-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 8px 0;
+}
+
+.recv .reply-divider {
+    background: var(--border);
+}
+
+.reply-new-message {
+    font-weight: 700;
+    font-size: 0.95rem;
 }
 /* ============================================
-   BOUTONS D'ATTACHEMENT (IMAGE + MICRO)
+   STYLE BOUTONS ATTACH (IMAGE + AUDIO)
    ============================================ */
+
 .attach-buttons {
     display: flex;
-    gap: 8px;
-    flex-shrink: 0;
+    gap: 6px;
+    align-items: center;
 }
 
 .attach-btn {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: var(--s2);
     border: 1px solid var(--border);
     color: var(--text2);
-    font-size: 1.1rem;
+    font-size: 1rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.1s ease, background 0.2s ease, color 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    flex-shrink: 0;
 }
 
 .attach-btn:active {
     transform: scale(0.92);
+    background: var(--s3);
 }
 
-.attach-btn.recording {
-    background: #ef4444;
-    color: white;
-    border-color: #ef4444;
-    animation: pulseRed 1s ease-in-out infinite;
+#attachImageBtn:hover {
+    color: #3b8bff;
+    border-color: #3b8bff;
+    box-shadow: 0 0 12px rgba(59, 139, 255, 0.3);
 }
 
-@keyframes pulseRed {
-    0%, 100% {
-        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-    }
-    50% {
-        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
-    }
+#attachAudioBtn:hover {
+    color: #f87171;
+    border-color: #f87171;
+    box-shadow: 0 0 12px rgba(248, 113, 113, 0.3);
+}
+
+#attachAudioStopBtn {
+    color: #f87171;
+    border-color: #f87171;
+    animation: pulseStop 1s ease-in-out infinite;
+}
+
+@keyframes pulseStop {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.5); }
+    50% { box-shadow: 0 0 0 10px rgba(248, 113, 113, 0); }
 }
 
 /* ============================================
-   INDICATEUR D'ENREGISTREMENT
+   RECORDING INDICATOR
    ============================================ */
 .recording-indicator {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 10px 16px;
+    gap: 8px;
     background: var(--s1);
-    border: 1px solid var(--border);
-    border-radius: 40px;
+    border: 1px solid #f87171;
+    border-radius: 30px;
+    padding: 8px 16px;
     margin: 0 12px 8px 12px;
-    animation: slideInUp 0.2s ease-out;
-}
-
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    animation: fadeInUp 0.3s ease-out;
 }
 
 .recording-wave {
     display: flex;
     align-items: center;
-    gap: 3px;
-    height: 30px;
+    gap: 2px;
 }
 
 .recording-wave span {
+    display: block;
     width: 3px;
-    height: 100%;
-    background: var(--accent);
-    border-radius: 3px;
-    animation: wave 0.8s ease-in-out infinite;
+    height: 14px;
+    background: #f87171;
+    border-radius: 2px;
+    animation: waveAnimation 0.8s ease-in-out infinite;
 }
 
-.recording-wave span:nth-child(1) { animation-delay: 0s; height: 15px; }
-.recording-wave span:nth-child(2) { animation-delay: 0.1s; height: 25px; }
-.recording-wave span:nth-child(3) { animation-delay: 0.2s; height: 30px; }
-.recording-wave span:nth-child(4) { animation-delay: 0.3s; height: 20px; }
-.recording-wave span:nth-child(5) { animation-delay: 0.4s; height: 10px; }
+.recording-wave span:nth-child(1) { animation-delay: 0s; }
+.recording-wave span:nth-child(2) { animation-delay: 0.1s; }
+.recording-wave span:nth-child(3) { animation-delay: 0.2s; }
+.recording-wave span:nth-child(4) { animation-delay: 0.3s; }
+.recording-wave span:nth-child(5) { animation-delay: 0.4s; }
 
-@keyframes wave {
-    0%, 100% {
-        transform: scaleY(0.5);
-        opacity: 0.5;
-    }
-    50% {
-        transform: scaleY(1);
-        opacity: 1;
-    }
+@keyframes waveAnimation {
+    0%, 100% { height: 6px; }
+    50% { height: 18px; }
 }
 
 .recording-text {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--accent);
+    font-weight: 700;
+    color: #f87171;
+    font-size: 0.8rem;
 }
 
 .recording-timer {
     font-family: 'DM Mono', monospace;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--text2);
-    background: var(--s2);
-    padding: 4px 8px;
+    font-weight: 700;
+    color: #f87171;
+    font-size: 0.9rem;
+    background: rgba(248, 113, 113, 0.1);
+    padding: 2px 10px;
     border-radius: 20px;
 }
 
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 /* ============================================
-   LECTEUR AUDIO DANS LES MESSAGES
+   REPLY BUBBLE - STYLE ÉPURÉ
    ============================================ */
-.msg-audio {
-    margin: 4px 0;
+
+.reply-bubble {
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 0.9rem;
+    line-height: 1.4;
 }
 
-.msg-audio audio {
-    max-width: 220px;
-    height: 40px;
-    border-radius: 20px;
+.sent .reply-bubble {
+    background: var(--sent);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.recv .reply-bubble {
     background: var(--s2);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+    color: var(--text);
 }
 
-.msg-audio audio::-webkit-media-controls-panel {
-    background: var(--s2);
-}
-
-/* Version envoyée (moi) - audio */
-.sent .msg-audio audio {
-    background: rgba(255, 255, 255, 0.15);
-}
-
-/* Version reçue (l'autre) - audio */
-.recv .msg-audio audio {
-    background: var(--s2);
-}
-
-/* ============================================
-   MESSAGE VOCAL DANS LA LISTE DES DISCUSSIONS
-   ============================================ */
-.disc-audio-icon {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    color: var(--accent);
+.reply-quoted-text {
     font-size: 0.75rem;
+    opacity: 0.7;
+    padding: 4px 8px;
+    border-left: 3px solid rgba(255,255,255,0.3);
+    margin-bottom: 6px;
+    font-style: italic;
 }
 
-.disc-audio-icon i {
-    font-size: 0.7rem;
+.recv .reply-quoted-text {
+    border-left-color: var(--accent);
 }
 
+.reply-new-message {
+    font-size: 0.9rem;
+}
 /* ============================================
-   PERMISSION MICRO (si refusée)
+   FIX HEIGHT - CHROME MOBILE (100dvh)
    ============================================ */
-.micro-permission-denied {
-    background: rgba(239, 68, 68, 0.1);
-    border-color: #ef4444;
-    color: #ef4444;
+
+html, body {
+    height: 100%;
+    height: 100dvh;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
-.micro-permission-denied:hover {
-    background: rgba(239, 68, 68, 0.2);
+.app {
+    height: 100%;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.view {
+    height: 100%;
+    height: 100dvh;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.view.active {
+    display: flex;
+}
+
+/* Éviter le resize sur mobile Chrome quand la barre d'adresse disparaît */
+@supports (-webkit-touch-callout: none) {
+    html, body, .app, .view {
+        height: -webkit-fill-available;
+    }
+}
+/* ============================================
+   COULEURS TEXTE LISTE DISCUSSIONS
+   ============================================ */
+
+.disc-last.text-sent {
+    color: var(--text2);
+}
+
+.disc-last.text-received-unread {
+    color: #3b8bff;
+    font-weight: 600;
+}
+
+.disc-last.text-reply-unread {
+    color: #34d399;
+    font-weight: 600;
+}
+
+.disc-last.text-read {
+    color: var(--text2);
 }
